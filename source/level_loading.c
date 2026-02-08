@@ -14,6 +14,9 @@ Object *objectArray = NULL;
 
 Section *section_hash[SECTION_HASH_SIZE] = {0};
 
+int channelCount = 0;
+GDColorChannel *colorChannels = NULL;
+
 static inline unsigned int section_hash_func(unsigned int x) {
     x ^= x >> 16;
     x *= 0x7feb352d;   // good mixing constant
@@ -362,6 +365,248 @@ bool parse_bool(const char *str) {
     return (str[0] == '1' && str[1] == '\0');
 }
 
+
+void parse_color_channel(GDColorChannel *channels, int i, char *channel_string) {
+    GDColorChannel channel = {0};  // Zero-initialize
+    int kvCount = 0;
+    char **kvs = split_string(channel_string, '_', &kvCount);
+
+    for (int j = 0; j + 1 < kvCount; j += 2) {
+        int key = atoi(kvs[j]);
+        const char *valStr = kvs[j + 1];
+
+        switch (key) {
+            case 1:  channel.fromRed = atoi(valStr); break;
+            case 2:  channel.fromGreen = atoi(valStr); break;
+            case 3:  channel.fromBlue = atoi(valStr); break;
+            case 4:  channel.playerColor = atoi(valStr); break;
+            case 5:  channel.blending = atoi(valStr) != 0; break;
+            case 6:  channel.channelID = atoi(valStr); break;
+            case 11: channel.toRed = atoi(valStr); break;
+            case 12: channel.toGreen = atoi(valStr); break;
+            case 13: channel.toBlue = atoi(valStr); break;
+        }
+    }
+
+    channels[i] = channel;
+    free_string_array(kvs, kvCount);
+}
+
+int parse_old_channels(char *level_string, GDColorChannel **outArray) {
+    GDColorChannel *channels = malloc(sizeof(GDColorChannel) * 2);
+    if (!channels) {
+        printf("Couldn't alloc initial pre 2.0 color channels\n");
+        return 0;
+    }
+
+    char *v19_bg = get_metadata_value(level_string, "kS29");
+
+    int i = 0;
+
+    if (v19_bg) { // 1.9 only
+        parse_color_channel(channels, i, v19_bg);
+        channels[i].channelID = CHANNEL_BG;
+        i++;
+
+        parse_color_channel(channels, i, get_metadata_value(level_string, "kS30"));
+        channels[i].channelID = CHANNEL_GROUND;
+        i++;
+
+        char *line = get_metadata_value(level_string, "kS31");
+        if (line) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, line);
+            channels[i].channelID = CHANNEL_LINE;
+            i++;
+        }
+        
+        char *obj = get_metadata_value(level_string, "kS32");
+        if (obj) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, obj);
+            channels[i].channelID = CHANNEL_OBJ;
+            i++;
+        }
+
+        char *col1 = get_metadata_value(level_string, "kS33");
+        if (col1) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, col1);
+            channels[i].channelID = 1;
+            i++;
+        }
+
+        char *col2 = get_metadata_value(level_string, "kS34");
+        if (col2) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, col2);
+            channels[i].channelID = 2;
+            i++;
+        }
+
+        char *col3 = get_metadata_value(level_string, "kS35");
+        if (col3) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, col3);
+            channels[i].channelID = 3;
+            i++;
+        }
+
+        char *col4 = get_metadata_value(level_string, "kS36");
+        if (col4) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, col4);
+            channels[i].channelID = 4;
+            i++;
+        }
+
+        char *dl3 = get_metadata_value(level_string, "kS37");
+        if (dl3) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, dl3);
+            channels[i].channelID = CHANNEL_3DL;
+            i++;
+        }
+        
+        *outArray = channels;
+        return i;
+    }
+
+    // Pre 1.9
+    int bg_r = atoi(get_metadata_value(level_string, "kS1"));
+    int bg_g = atoi(get_metadata_value(level_string, "kS2"));
+    int bg_b = atoi(get_metadata_value(level_string, "kS3"));
+
+    GDColorChannel bg_channel = {0};
+    bg_channel.channelID = CHANNEL_BG;
+    bg_channel.fromRed = bg_r;
+    bg_channel.fromGreen = bg_g;
+    bg_channel.fromBlue = bg_b;
+
+    char *bg_player_color = get_metadata_value(level_string, "kS16");
+    if (bg_player_color) {
+       bg_channel.playerColor = atoi(bg_player_color);
+    }
+
+    channels[i] = bg_channel;
+
+    i++;
+
+    int g_r = atoi(get_metadata_value(level_string, "kS4"));
+    int g_g = atoi(get_metadata_value(level_string, "kS5"));
+    int g_b = atoi(get_metadata_value(level_string, "kS6"));
+
+    GDColorChannel g_channel = {0};
+    g_channel.channelID = CHANNEL_GROUND;
+    g_channel.fromRed = g_r;
+    g_channel.fromGreen = g_g;
+    g_channel.fromBlue = g_b;
+
+    char *g_player_color = get_metadata_value(level_string, "kS17");
+    if (g_player_color) {
+        g_channel.playerColor = atoi(g_player_color);
+    }
+    
+    channels[i] = g_channel;
+    i++;
+
+    char *line_r = get_metadata_value(level_string, "kS7");
+    char *line_g = get_metadata_value(level_string, "kS8");
+    char *line_b = get_metadata_value(level_string, "kS9");
+
+    if (line_r && line_g && line_b) {
+        GDColorChannel line_channel = {0};
+        line_channel.channelID = CHANNEL_LINE;
+        line_channel.fromRed = atoi(line_r);
+        line_channel.fromGreen = atoi(line_g);
+        line_channel.fromBlue = atoi(line_b);
+        
+        char *line_player_color = get_metadata_value(level_string, "kS18");
+        if (line_player_color) {
+            line_channel.playerColor = atoi(line_player_color);
+        }
+
+        channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+        channels[i] = line_channel;
+        i++;
+    }
+
+    char *obj_r = get_metadata_value(level_string, "kS10");
+    char *obj_g = get_metadata_value(level_string, "kS11");
+    char *obj_b = get_metadata_value(level_string, "kS12");
+
+    if (obj_r && obj_g && obj_b) {
+        GDColorChannel obj_channel = {0};
+        obj_channel.channelID = CHANNEL_OBJ;
+        obj_channel.fromRed = atoi(obj_r);
+        obj_channel.fromGreen = atoi(obj_g);
+        obj_channel.fromBlue = atoi(obj_b);
+
+        char *obj_player_color = get_metadata_value(level_string, "kS19");
+        if (obj_player_color) {
+            obj_channel.playerColor = atoi(obj_player_color);
+        }
+        
+        channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+        channels[i] = obj_channel;
+        i++;
+    }
+
+    char *obj_2_r = get_metadata_value(level_string, "kS13");
+    char *obj_2_g = get_metadata_value(level_string, "kS14");
+    char *obj_2_b = get_metadata_value(level_string, "kS15");
+
+    if (obj_2_r && obj_2_g && obj_2_b) {
+        GDColorChannel obj_2_channel = {0};
+        obj_2_channel.channelID = 1;
+        obj_2_channel.fromRed = atoi(obj_2_r);
+        obj_2_channel.fromGreen = atoi(obj_2_g);
+        obj_2_channel.fromBlue = atoi(obj_2_b);
+        
+        char *obj_2_player_color = get_metadata_value(level_string, "kS20");
+        if (obj_2_player_color) {
+            obj_2_channel.playerColor = atoi(obj_2_player_color);
+        }
+
+        char *obj_2_blending = get_metadata_value(level_string, "kA5");
+        if (obj_2_blending) {
+            obj_2_channel.blending = atoi(obj_2_blending) != 0;
+        }
+
+        channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+        channels[i] = obj_2_channel;
+        i++;
+    }
+
+    *outArray = channels;
+
+    return i;
+}
+
+int parse_color_channels(const char *colorString, GDColorChannel **outArray) {
+    if (!colorString || !outArray) return 0;
+
+    int count = 0;
+    // Split string into each channel
+    char **entries = split_string(colorString, '|', &count);
+    if (!entries) return 0;
+
+    GDColorChannel *channels = malloc(sizeof(GDColorChannel) * count);
+    if (!channels) {
+        printf("Couldn't alloc color channels\n");
+        free_string_array(entries, count);
+        return 0;
+    }
+
+    for (int i = 0; i < count; i++) {
+        parse_color_channel(channels, i, entries[i]);
+    }
+
+    *outArray = channels;
+    free_string_array(entries, count);
+    return count;
+}
+
 GDValueType get_value_type_for_key(int key) {
     switch (key) {
         case 1:  return GD_VAL_INT;    // Object ID
@@ -370,19 +615,19 @@ GDValueType get_value_type_for_key(int key) {
         case 4:  return GD_VAL_BOOL;   // Flipped Horizontally
         case 5:  return GD_VAL_BOOL;   // Flipped Vertically
         case 6:  return GD_VAL_FLOAT;  // Rotation
-//        case 7:  return GD_VAL_INT;    // (Color/Pulse trigger) Red
-//        case 8:  return GD_VAL_INT;    // (Color/Pulse trigger) Green
-//        case 9:  return GD_VAL_INT;    // (Color/Pulse trigger) Blue
-//        case 10: return GD_VAL_FLOAT;  // (Color trigger) Duration
-//        case 11: return GD_VAL_BOOL;   // (Triggers) Touch Triggered
-//        case 14: return GD_VAL_BOOL;   // (Color trigger) Tint ground
-//        case 15: return GD_VAL_BOOL;   // (Color trigger) Player 1 color
-//        case 16: return GD_VAL_BOOL;   // (Color trigger) Player 2 color
-//        case 17: return GD_VAL_BOOL;   // (Color trigger) Blending
+        case 7:  return GD_VAL_INT;    // (Color/Pulse trigger) Red
+        case 8:  return GD_VAL_INT;    // (Color/Pulse trigger) Green
+        case 9:  return GD_VAL_INT;    // (Color/Pulse trigger) Blue
+        case 10: return GD_VAL_FLOAT;  // (Color trigger) Duration
+        case 11: return GD_VAL_BOOL;   // (Triggers) Touch Triggered
+        case 14: return GD_VAL_BOOL;   // (Color trigger) Tint ground
+        case 15: return GD_VAL_BOOL;   // (Color trigger) Player 1 color
+        case 16: return GD_VAL_BOOL;   // (Color trigger) Player 2 color
+        case 17: return GD_VAL_BOOL;   // (Color trigger) Blending
         case 19: return GD_VAL_INT;    // 1.9 color channel
         case 21: return GD_VAL_INT;    // Main col channel
         case 22: return GD_VAL_INT;    // Detail col channel
-//        case 23: return GD_VAL_INT;    // (Color trigger) Target color ID
+        case 23: return GD_VAL_INT;    // (Color trigger) Target color ID
         case 24: return GD_VAL_INT;    // Zlayer
         case 25: return GD_VAL_INT;    // Zorder
 //        case 28: return GD_VAL_INT;    // (Move trigger) Offset X
@@ -443,14 +688,44 @@ void fill_object_data(Object *object, int key, GDValueType type, GDValue val) {
         case 6:  // Rotation
             if (type == GD_VAL_FLOAT) object->rotation = val.f;
             break;
+        case 7:  // Color R
+            if (type == GD_VAL_INT) object->trig_colorR = val.i;
+            break;
+        case 8:  // Color G
+            if (type == GD_VAL_INT) object->trig_colorG = val.i;
+            break;
+        case 9:  // Color B
+            if (type == GD_VAL_INT) object->trig_colorB = val.i;
+            break;
+        case 10: // Duration
+            if (type == GD_VAL_FLOAT) object->trig_duration = val.f;
+            break;
+        case 11: // Touch triggered
+            if (type == GD_VAL_BOOL) object->touch_triggered = val.b;
+            break;
+        case 14: // Tint Ground
+            if (type == GD_VAL_BOOL) object->tintGround = val.b;
+            break;
+        case 15: // Player 1 color
+            if (type == GD_VAL_BOOL) object->p1_color = val.b;
+            break;
+        case 16: // Player 2 color
+            if (type == GD_VAL_BOOL) object->p2_color = val.b;
+            break;
+        case 17: // Blending
+            if (type == GD_VAL_BOOL) object->blending = val.b;
+            break;
         case 19: // 1.9 channel id
-            if (type == GD_VAL_INT) object->detail_col_channel = convert_one_point_nine_channel(val.i);
+            if (type == GD_VAL_INT) object->v1p9_col_channel = convert_one_point_nine_channel(val.i);
             break;
         case 21: // Main col channel
             if (type == GD_VAL_INT) object->col_channel = val.i;
             break;
         case 22: // Detail col channel
             if (type == GD_VAL_INT) object->detail_col_channel = val.i;
+            break;
+        case 23: // Target color ID
+            if (type == GD_VAL_INT) object->target_color_id = val.i;
             break;
         case 24: // Z layer
             if (type == GD_VAL_INT) object->zlayer = val.i;
@@ -512,10 +787,6 @@ void fill_object_data(Object *object, int key, GDValueType type, GDValue val) {
 //                    break;
 //            }
 //        } else {
-//            if (key == 10) { // Duration
-//                if (type == GD_VAL_FLOAT) object->trigger.trig_duration = val.f;
-//            } else if (key == 11) { // Touch triggered
-//                if (type == GD_VAL_BOOL) object->trigger.touch_triggered = val.b;
 //            } else if (key == 62) { // Spawn triggered
 //                if (type == GD_VAL_BOOL) object->trigger.spawn_triggered = val.b;
 //            } else if (key == 87) { // Multi triggered
@@ -524,30 +795,6 @@ void fill_object_data(Object *object, int key, GDValueType type, GDValue val) {
 //            switch (*soa_type(object)) {
 //                case TYPE_COL_TRIGGER:
 //                    switch (key) {
-//                        case 7:  // Color R
-//                            if (type == GD_VAL_INT) object->trigger.col_trigger.trig_colorR = val.i;
-//                            break;
-//                        case 8:  // Color G
-//                            if (type == GD_VAL_INT) object->trigger.col_trigger.trig_colorG = val.i;
-//                            break;
-//                        case 9:  // Color B
-//                            if (type == GD_VAL_INT) object->trigger.col_trigger.trig_colorB = val.i;
-//                            break;
-//                        case 14: // Tint Ground
-//                            if (type == GD_VAL_BOOL) object->trigger.col_trigger.tintGround = val.b;
-//                            break;
-//                        case 15: // Player 1 color
-//                            if (type == GD_VAL_BOOL) object->trigger.col_trigger.p1_color = val.b;
-//                            break;
-//                        case 16: // Player 2 color
-//                            if (type == GD_VAL_BOOL) object->trigger.col_trigger.p2_color = val.b;
-//                            break;
-//                        case 17: // Blending
-//                            if (type == GD_VAL_BOOL) object->trigger.col_trigger.blending = val.b;
-//                            break;
-//                        case 23: // Target color ID
-//                            if (type == GD_VAL_INT) object->trigger.col_trigger.target_color_id = val.i;
-//                            break;
 //                        case 35: // Opacity
 //                            if (type == GD_VAL_FLOAT) object->trigger.col_trigger.opacity = val.f;
 //                            break;
@@ -727,7 +974,7 @@ int parse_gd_object(const char *objStr, Object *obj) {
         return 0;
     }
 
-    // Iterate through all keys, up to MAX_OBJECT_PROPERTIES
+    // Iterate through all keys
     for (int i = 0; i + 1 < count; i += 2) {
         int key = atoi(tokens[i]);
         const char *valStr = tokens[i + 1];
@@ -754,10 +1001,12 @@ int parse_gd_object(const char *objStr, Object *obj) {
     
     const GameObject *game_object = &game_objects[obj->id];
 
-    if (!obj_has_main(game_object) && obj_has_detail(game_object) && !obj->col_channel) {
-        obj->col_channel = game_object->base_color;
-    } else if (game_object->swap_base_detail) {
-        if (!obj->detail_col_channel) obj->detail_col_channel = game_object->base_color;
+    if (game_object->swap_base_detail) {
+        if (!obj_has_main(game_object)) {
+            if (!obj->col_channel) obj->col_channel = game_object->base_color;
+        } else {
+            if (!obj->detail_col_channel) obj->detail_col_channel = game_object->base_color;
+        }
     } else {
         if (!obj->col_channel) obj->col_channel = game_object->base_color;
         if (!obj->detail_col_channel) obj->detail_col_channel = 1;
@@ -811,26 +1060,73 @@ Object *parse_string(const char *levelString) {
     return objectArray;
 }
 
+void set_color_channels() {
+    for (int i = 0; i < channelCount; i++) {
+        GDColorChannel colorChannel = colorChannels[i];
+        int id = colorChannel.channelID;
+
+        switch (id) {
+            case CHANNEL_P1:
+            case CHANNEL_P2:
+                break;
+
+            default:
+                if (id < COL_CHANNEL_NUM) {
+                    memset(&channels[id], 0, sizeof(ColorChannel));
+                    Color color;
+                    color.r = colorChannel.fromRed;
+                    color.g = colorChannel.fromGreen;
+                    color.b = colorChannel.fromBlue;
+
+                    channels[id].blending = colorChannel.blending;
+
+                    
+                    channels[id].color = color;
+
+                    if (colorChannel.playerColor == 1) channels[id].color = p1_color;
+                    if (colorChannel.playerColor == 2) channels[id].color = p2_color;
+                    
+                }
+        }
+    }
+}
+
 int load_level(char *path) {
     size_t out;
 	char *level = read_file(path, &out);
-	if (!level) return 0;
+	if (!level) return 1;
 
 	char *data = decompress_level(level);
 	if (data) {
+        // Get level starting colors
+        char *metaStr = get_metadata_value(data, "kS38");
+        channelCount = parse_color_channels(metaStr, &colorChannels);
+
+        // Fallback to pre 2.0 color keys
+        if (!channelCount) {
+            channelCount = parse_old_channels(data, &colorChannels);
+        }
+
         objectArray = parse_string(data);
         free(data);
-        if (!objectArray) return 0;
+        if (!objectArray) return 2;
     }
     free(level);
 
     init_col_channels();
+    set_color_channels();
 
-    return 1;
+    return 0;
 }
 
 void unload_level() {
     free(objectArray);
     free_sections();
+    
+    if (colorChannels) {
+        free(colorChannels);
+        colorChannels = NULL;
+    }
+    
     objectArray = NULL;
 }

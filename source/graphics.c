@@ -67,9 +67,27 @@ int get_color_channel(int col_type, Object *obj, const GameObject *game_obj) {
 	int col_channel = 0;
 	if (col_type == COLOR_TYPE_BLACK) col_channel = 0;
 	else if (col_type == COLOR_TYPE_WHITE) col_channel = -1;
-	else if (!obj_has_main(game_obj) && col_type == COLOR_TYPE_DETAIL) col_channel = obj->col_channel;
-	else if (col_type == COLOR_TYPE_BASE) col_channel = obj->col_channel;
-	else if (col_type == COLOR_TYPE_DETAIL) col_channel = obj->detail_col_channel;
+	else {
+		if (obj->v1p9_col_channel) {
+			if (col_type == COLOR_TYPE_DETAIL) col_channel = obj->v1p9_col_channel;
+		} else {
+			if (obj->col_channel) {
+				if (col_type == COLOR_TYPE_BASE) {
+					col_channel = obj->col_channel;
+				} else if (!obj_has_main(game_obj)) {
+					col_channel = obj->col_channel;
+				}
+			}
+
+			if (obj->detail_col_channel) {
+				if (col_type == COLOR_TYPE_DETAIL) {
+					if (obj_has_main(game_obj)) {
+						col_channel = obj->detail_col_channel;
+					}
+				}
+			}
+		}
+	}
 	return col_channel;
 }
 
@@ -322,7 +340,7 @@ void draw_objects() {
 		} else {
 			col = channels[col_channel];
 		}
-
+		
 		if (col.blending && !blend_enabled) {
 			C2D_Flush();
 			C3D_AlphaBlend(

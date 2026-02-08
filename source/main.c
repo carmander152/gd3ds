@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 	C2D_SetTintMode(C2D_TintMult);
 
 	int returned = load_level("romfs:/TheoryofEverything2.gmd");
-	if (!returned) printf("\x1b[9;1HFailed");
+	if (returned) printf("\x1b[9;1HFailed %d", returned);
 
 	printf("\x1b[8;1HUse dpad to move camera");
 	// Main loop
@@ -78,7 +78,9 @@ int main(int argc, char* argv[]) {
 		if (kHeld & KEY_LEFT) {
 			cam_x -= CAM_SPEED;
 		}
-		
+
+		handle_triggers();
+		handle_col_triggers();
 		calculate_lbg();
 		
 		printf("\x1b[1;1HSpriteCount: %d\x1b[K", sprite_count);

@@ -232,7 +232,8 @@ $(OUTPUT_FILE).3dsx: $(OUTPUT_FILE).elf $(OUTPUT_FILE).smdh
 	@echo "dump  ... $(notdir $<)"
 	$(SILENT)$(OBJDUMP) -h -C -S $< > $(DUMPFILE)
 	@echo "built ... $(notdir $@)"
-	$(SILENT)3dsxtool $< $@ --smdh=$(OUTPUT_FILE).smdh
+	$(SILENT)3dsxtool $< $@ $(_3DSXFLAGS)
+
 
 $(OUTPUT_FILE).3ds: $(OUTPUT_FILE).elf banner.bnr icon.icn
 	@$(MAKEROM) -f cci -o $(OUTPUT_FILE).3ds -DAPP_ENCRYPTED=true $(COMMON_MAKEROM_PARAMS)

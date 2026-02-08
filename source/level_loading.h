@@ -25,10 +25,35 @@ typedef struct {
     float x, y;
     float rotation;
     int zlayer, zorder;
+    float trig_duration;
+
+    unsigned short v1p9_col_channel;
     unsigned short col_channel;
     unsigned short detail_col_channel;
-    unsigned char flippedH, flippedV;
+    unsigned short target_color_id;
+
+    unsigned char trig_colorR, trig_colorG, trig_colorB;
+    bool tintGround;
+    bool p1_color, p2_color;
+    bool blending;
+    bool touch_triggered;
+    bool flippedH, flippedV;
+
+    bool activated;
 } Object;
+
+typedef struct {
+    int fromRed;
+    int fromGreen;
+    int fromBlue;
+    int playerColor;
+    bool blending;
+    int channelID;
+    int toRed;
+    int toGreen;
+    int toBlue;
+} GDColorChannel;
+
 
 typedef struct Section {
     Object **objects;
