@@ -1038,7 +1038,7 @@ Object *parse_string(const char *levelString) {
     }
 
     printf("Parsing string and converting objects...\n");
-    printf("%d bytes of pure objects", sizeof(Object) * objectCount);
+    printf("%d bytes of pure objects\n", sizeof(Object) * objectCount);
 
     for (int i = 0; i < objectCount; i++) {
         Object *object = &objectArray[i];
