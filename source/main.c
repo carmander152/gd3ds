@@ -13,6 +13,9 @@
 #include "color_channels.h"
 #include "mp3_player.h"
 
+#include "menus/level_select.h"
+#include "menus/components/ui_image.h"
+
 #define CITRA_TYPE 0x20000
 #define CITRA_VERSION 11
 
@@ -68,8 +71,12 @@ int main(int argc, char* argv[]) {
 	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
 	C2D_Init(MAX_SPRITES);
 	C2D_Prepare();
-	consoleInit(GFX_BOTTOM, NULL);
 	osSetSpeedupEnable(1);
+
+	ui_assets_init();
+	
+	level_select_loop();
+	consoleInit(GFX_BOTTOM, NULL);
 
 	// Create screens
 	C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
