@@ -66,7 +66,8 @@ static void ui_checkbox_draw(UIElement* e) {
 UIElement ui_create_checkbox(
     int x, int y, bool enabled,
     UIActionFn action,
-    void* action_data
+    void *action_data,
+    char *tag
 ) {
     UIElement e = {
         .type = UI_CHECKBOX,
@@ -79,6 +80,9 @@ UIElement ui_create_checkbox(
         .update = ui_checkbox_update,
         .draw = ui_checkbox_draw
     };
+
+    // Copy tag
+    strncpy(e.tag, tag, 15);
 
     set_checkbox_texture(&e, enabled);
 

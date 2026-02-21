@@ -66,8 +66,9 @@ static void ui_button_draw(UIElement* e) {
 UIElement ui_create_button(
     int x, int y, int sprite_index, 
     UIActionFn action,
-    void* action_data,
-    char* text
+    void *action_data,
+    char *text,
+    char *tag
 ) {
     UIElement e = {
         .type = UI_BUTTON,
@@ -81,6 +82,8 @@ UIElement ui_create_button(
         .draw = ui_button_draw
     };
 
+    // Copy tag
+    strncpy(e.tag, tag, 15);
     // Copy text
     strncpy(e.button.text, text, 63);
 

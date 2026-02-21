@@ -40,7 +40,7 @@ void ui_image_clear_tint(UIElement* e) {
     e->image.useTint = false;
 }
 
-UIElement ui_create_image(int x, int y, int sprite_index, float sx, float sy) {
+UIElement ui_create_image(int x, int y, int sprite_index, float sx, float sy, char *tag) {
     UIElement e = {0};
 
     e.type = UI_IMAGE;
@@ -52,6 +52,9 @@ UIElement ui_create_image(int x, int y, int sprite_index, float sx, float sy) {
 
     C2D_SpriteFromSheet(&e.image.sprite, ui_sheet, sprite_index);
 
+    // Copy tag
+    strncpy(e.tag, tag, 15);
+    
     e.w = e.image.sprite.params.pos.w * sx;
     e.h = e.image.sprite.params.pos.h * sy;
 

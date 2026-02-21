@@ -2,4 +2,4 @@ button x=160 y=60 id=104 action="hibykrmal" text="1"
 label x=160 y=30 text="I love labels" align=CENTER scale=0.5
 image x=36 y=205 id=178
 image x=284 y=205 id=178 sx=-1.0
-checkbox x=160 y=100
+checkbox x=160 y=100 tag="checky"

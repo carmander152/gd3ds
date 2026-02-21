@@ -17,3 +17,4 @@ void ui_load_screen(UIScreen* screen, const UIAction* actions, size_t count, con
 
 void ui_screen_update(UIScreen* screen, touchPosition* touch);
 void ui_screen_draw(UIScreen* screen);
+UIElement *get_element_by_tag(UIScreen *screen, const char *tag);

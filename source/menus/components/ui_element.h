@@ -67,6 +67,8 @@ struct UIElement {
         UICheckBoxData checkbox;
     };
 
+    char tag[16];
+
     void (*update)(UIElement*, touchPosition*);
     void (*draw)(UIElement*);
 };

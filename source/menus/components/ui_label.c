@@ -16,7 +16,7 @@ static void ui_label_draw(UIElement* e) {
     draw_text(bigFont_fontCharset, bigFont_sheet, e->x, e->y, e->label.scale, e->label.alignment, "%s", e->label.text);
 }
 
-UIElement ui_create_label(int x, int y, float scale, char* text, float alignment) {
+UIElement ui_create_label(int x, int y, float scale, char *text, float alignment, char *tag) {
     UIElement e = {0};
 
     e.type = UI_LABEL;
@@ -26,6 +26,9 @@ UIElement ui_create_label(int x, int y, float scale, char* text, float alignment
     
     e.label.alignment = alignment;
     e.label.scale = scale;
+    
+    // Copy tag
+    strncpy(e.tag, tag, 15);
 
     // Copy text
     strncpy(e.label.text, text, 255);

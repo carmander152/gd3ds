@@ -85,6 +85,15 @@ static bool get_bool(char *value) {
     return *value == 't' || *value == 'T';
 }
 
+UIElement *get_element_by_tag(UIScreen *screen, const char *tag) {
+    for (int i = 0; i < screen->count; i++) {
+        if (strcmp(screen->elements[i].tag, tag) == 0) {
+            return &screen->elements[i];
+        }
+    }
+    return NULL;
+}
+
 void ui_load_screen(UIScreen* screen,
                     const UIAction* actions,
                     size_t actionCount,
@@ -119,6 +128,7 @@ void ui_load_screen(UIScreen* screen,
         bool checked = false;
 
         char text[256] = {0};
+        char tag[16] = {0};
 
         // Parse key=value pairs
         while ((token = next_token(&cursor)) != NULL) {
@@ -130,7 +140,7 @@ void ui_load_screen(UIScreen* screen,
             char* key = token;
             char* value = equal + 1;
 
-
+            // Parameters
             if (strcmp(key, "x") == 0)
                 x = atoi(value);
             else if (strcmp(key, "y") == 0)
@@ -158,7 +168,10 @@ void ui_load_screen(UIScreen* screen,
                     align = 1.0f;
                 } else {
                     align = 0.f;
-                }
+                } 
+            } else if (strcmp(key, "tag") == 0) {
+                strip_quotes(value);
+                strncpy(tag, value, 15);
             } else if (strcmp(key, "checked") == 0) {
                 checked = get_bool(value);
             }
@@ -173,20 +186,22 @@ void ui_load_screen(UIScreen* screen,
                     x, y, id,
                     ui_find_action(actions, actionCount, actionName),
                     NULL,
-                    text
+                    text,
+                    tag
                 );
         } else if (strcmp(type, "image") == 0) {
             screen->elements[screen->count++] =
-                ui_create_image(x, y, id, sx, sy);
+                ui_create_image(x, y, id, sx, sy, tag);
         } else if (strcmp(type, "label") == 0) {
             screen->elements[screen->count++] =
-                ui_create_label(x, y, scale, text, align);
+                ui_create_label(x, y, scale, text, align, tag);
         } else if (strcmp(type, "checkbox") == 0) {
             screen->elements[screen->count++] =
                 ui_create_checkbox(
                     x, y, checked,
                     ui_find_action(actions, actionCount, actionName),
-                    NULL
+                    NULL,
+                    tag
                 );
         }
     }

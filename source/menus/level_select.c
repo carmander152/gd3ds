@@ -18,6 +18,8 @@ void level_select_loop() {
 
 	ui_load_screen(&screen, actions, sizeof(actions) / sizeof(actions[0]), "romfs:/menus/level_select.txt");
 
+	bool prev_checked = false;
+
 	while (aptMainLoop()) {
 		hidScanInput();
         
@@ -26,6 +28,15 @@ void level_select_loop() {
 		touchPosition touch;
 		hidTouchRead(&touch);
 		ui_screen_update(&screen, &touch);
+
+		UIElement *checkbox = get_element_by_tag(&screen, "checky");
+		if (checkbox) {
+			bool checked = checkbox->checkbox.checked;
+			if (checked != prev_checked) {
+				printf("%d\n", checkbox->checkbox.checked);
+				prev_checked = checked;
+			}
+		}
 
 		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 		C2D_TargetClear(bot, C2D_Color32(3, 177, 255, 255));
