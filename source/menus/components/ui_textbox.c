@@ -43,7 +43,7 @@ static void ui_textbox_draw(UIElement* e) {
 }
 
 UIElement ui_create_textbox(
-    int x, int y, int w, char *title,
+    int x, int y, int w, int limit, char *title,
     char (*tag)[TAG_LENGTH]
 ) {
     UIElement e = {
@@ -62,6 +62,6 @@ UIElement ui_create_textbox(
     e.textbox.atlas = C2D_SpriteSheetGetImage(window_sheet, TEXTBOX_STYLE);
     e.textbox.border = e.textbox.atlas.subtex->width / 3;
 
-    e.textbox.character_limit = 10;
+    e.textbox.character_limit = limit;
     return e;
 }

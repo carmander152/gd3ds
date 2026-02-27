@@ -50,7 +50,7 @@ UIElement ui_create_image(int x, int y, int sprite_index, float sx, float sy, ch
     e.type = UI_IMAGE;
     e.x = x;
     e.y = y;
-    e.enabled = false;
+    e.enabled = true;
     e.image.useTint = false;
 
     C2D_SpriteFromSheet(&e.image.sprite, ui_sheet, sprite_index);

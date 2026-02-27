@@ -18,6 +18,12 @@ static void ui_button_update(UIElement* e, UIInput* touch) {
     // Check if pressed the button
     if (inside && pressedTouch && !touch->did_something) {
         e->button.hovered = true;
+        e->button.pressed = true;
+    }
+
+    // If previously pressed on it, hover
+    if (inside && e->button.pressed) {
+        e->button.hovered = true;
     }
     
     EaseTypes bounce_type;
@@ -37,6 +43,7 @@ static void ui_button_update(UIElement* e, UIInput* touch) {
 
     // If released on button, do its action
     if (e->button.hovered && releasedTouch) {
+        e->button.pressed = false;
         if (e->action)
             e->action(e->action_data);
     }

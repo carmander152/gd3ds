@@ -35,6 +35,12 @@ static void ui_checkbox_update(UIElement* e, UIInput* touch) {
     // Check if pressed the checkbox
     if (inside && pressedTouch && !touch->did_something) {
         e->checkbox.hovered = true;
+        e->checkbox.pressed = true;
+    }
+
+    // If previously pressed on it, hover
+    if (inside && e->checkbox.pressed) {
+        e->checkbox.hovered = true;
     }
     
     EaseTypes bounce_type;
@@ -54,9 +60,10 @@ static void ui_checkbox_update(UIElement* e, UIInput* touch) {
 
     // If released on checkbox, do its action
     if (e->checkbox.hovered && releasedTouch) {
+        e->checkbox.checked ^= 1;
+        e->checkbox.pressed = false;
         if (e->action)
             e->action(e->action_data);
-        e->checkbox.checked ^= 1;
         set_checkbox_texture(e, e->checkbox.checked);
     }
     

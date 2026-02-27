@@ -205,6 +205,7 @@ void ui_load_screen(UIScreen* screen,
         bool checked = false;
         int style = 0;
         int w = 0, h = 0;
+        int limit = 16;
 
         // Some strings
         char actionName[64] = {0};
@@ -239,7 +240,6 @@ void ui_load_screen(UIScreen* screen,
                 sx = atof(value);
             else if (strcmp(key, "sy") == 0)
                 sy = atof(value);
-                
             else if (strcmp(key, "scale") == 0)
                 scale = atof(value);
             else if (strcmp(key, "action") == 0) {
@@ -266,6 +266,8 @@ void ui_load_screen(UIScreen* screen,
             } else if (strcmp(key, "title") == 0) {
                 strip_quotes(value);
                 strncpy(text, value, 63);
+            } else if (strcmp(key, "limit") == 0) {
+                limit = atoi(value);
             }
         }
 
@@ -306,7 +308,7 @@ void ui_load_screen(UIScreen* screen,
         } else if (strcmp(type, "textbox") == 0) {
             screen->elements[screen->count++] =
                 ui_create_textbox(
-                    x, y, w, text,
+                    x, y, w, limit, text,
                     tag
                 );
         }
