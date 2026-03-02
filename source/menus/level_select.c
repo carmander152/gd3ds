@@ -11,6 +11,7 @@
 #include "main.h"
 #include "easing.h"
 #include "color_channels.h"
+#include "mp3_player.h"
 
 #include "level/main_levels.h"
 
@@ -203,9 +204,6 @@ UIAction actions_top[] = {
 };
 
 void level_select_loop() {
-	C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
-	C3D_RenderTarget* bot = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
-
 	ui_load_screen(&screen, actions, sizeof(actions) / sizeof(actions[0]), "romfs:/menus/level_select.txt");
 	ui_load_screen(&screen_top, actions_top, sizeof(actions_top) / sizeof(actions_top[0]), "romfs:/menus/level_select_top.txt");
 
@@ -240,12 +238,12 @@ void level_select_loop() {
 
 	scroll_dir = 0;
 
-	gspWaitForVBlank();
-	GSPGPU_SetLcdForceBlack(0);
 		
 	// Set bg color
 	bg_gradient = ui_get_element_by_tag(&screen, "gradient");
 	bg_gradient_top = ui_get_element_by_tag(&screen_top, "gradient");
+
+	play_mp3("romfs:/songs/menuLoop.mp3", true);
 
 	while (aptMainLoop()) {
 		hidScanInput();
@@ -302,9 +300,7 @@ void level_select_loop() {
 		
 		C3D_FrameEnd(0);
 	}
-
-	C3D_RenderTargetDelete(bot);
-	C3D_RenderTargetDelete(top);
-
+	stop_mp3();
+	C2D_TargetClear(bot, C2D_Color32(0, 0, 0, 255));
 	start_level = false;
 }

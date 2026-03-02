@@ -13,6 +13,9 @@ enum GameState {
     STATE_EXIT
 };
 
+extern C3D_RenderTarget* top;
+extern C3D_RenderTarget* bot;
+
 extern int game_state;
 
 extern float cam_x;

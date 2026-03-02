@@ -22,6 +22,7 @@ static int32_t rate;
 static int audio_channels;
 
 static volatile bool quit = false;
+static volatile bool looping = false;
 static volatile bool skip = false;
 
 static Thread threadId = NULL;
@@ -124,8 +125,12 @@ void audio_thread(void *const file) {
                 LightLock_Unlock(&decoderLock);
 
                 if (read == 0) {
-                    lastbuf = true;
-                    continue;
+                    if (looping) {
+                        seek_mp3(0);
+                    } else {
+                        lastbuf = true;
+                        continue;
+                    }
                 }
 
                 buf->nsamples = read / channels_mp3();
@@ -150,8 +155,9 @@ void audio_thread(void *const file) {
 }
 
 // Play an mp3 file defined by a path
-int play_mp3(char *path) {
+int play_mp3(char *path, bool loop) {
     quit = false;
+    looping = loop;
 
     int32_t priority = 0x30;
     svcGetThreadPriority(&priority, CUR_THREAD_HANDLE);
@@ -164,9 +170,6 @@ int play_mp3(char *path) {
     threadId = threadCreate(audio_thread, path,
                                           THREAD_STACK_SZ, priority,
                                           THREAD_AFFINITY, true);
-
-    printf("musica play on thread %p\n", threadId);
-
     return 0;
 }
 

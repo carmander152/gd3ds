@@ -27,6 +27,9 @@ int game_state = STATE_LEVEL_SELECT;
 
 PrintConsole console;
 
+C3D_RenderTarget* top;
+C3D_RenderTarget* bot;
+
 bool is_citra() {
 	s64 version = 0;
 	svcGetSystemInfo(&version, CITRA_TYPE, CITRA_VERSION);
@@ -64,24 +67,16 @@ void no_dsp_firmware(void) {
 }
 
 void game_loop() {
-	consoleInit(GFX_BOTTOM, NULL);
-
-	// Create screens
-	C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
-	C3D_RenderTargetClear(top, C3D_CLEAR_ALL, 0, 0);
-
 	int returned = load_level(main_levels[curr_level_id].gmd_path);
 	if (returned) printf("\x1b[9;1HFailed %d", returned);
 
-	returned = play_mp3(main_levels[curr_level_id].song_path);
+	returned = play_mp3(main_levels[curr_level_id].song_path, false);
 
 	printf("\x1b[8;1HUse dpad to move camera");
 	cam_x = 0;
     cam_y = 0;
 	current_fading_effect = FADE_NONE;
 
-	gspWaitForVBlank();
-	GSPGPU_SetLcdForceBlack(0);
 	// Main loop
 	while (aptMainLoop()) {
 		hidScanInput();
@@ -129,7 +124,7 @@ void game_loop() {
 
 		// Render the scene
 		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-		C3D_RenderTargetClear(top, C3D_CLEAR_ALL, 0, 0);
+		C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
 		C3D_AlphaBlend(GPU_BLEND_ADD, GPU_BLEND_ADD, GPU_SRC_ALPHA, GPU_ONE_MINUS_SRC_ALPHA, GPU_ONE, GPU_ZERO);
 		C2D_SceneBegin(top);
 		
@@ -142,10 +137,11 @@ void game_loop() {
 		draw_ground(0, false);
 		C2D_ViewReset();
 
+		C2D_SceneBegin(bot);
+		C2D_TargetClear(bot, C2D_Color32(0, 0, 0, 255));
+
 		C3D_FrameEnd(0);
 	}
-
-	C3D_RenderTargetDelete(top);
 
 	unload_level();
 
@@ -186,12 +182,11 @@ int main(int argc, char* argv[]) {
 	spriteSheet2 = C2D_SpriteSheetLoad("romfs:/gfx/portals.t3x");
 	if (!spriteSheet2) svcBreak(USERBREAK_PANIC);
 
+	top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
+	bot = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
+
 	bool exit = false;
 	while (aptMainLoop() && !exit) {
-		gspWaitForVBlank();
-		GSPGPU_SetLcdForceBlack(1);
-		gfxSetScreenFormat(GFX_TOP, GSP_BGR8_OES);
-		gfxSetScreenFormat(GFX_BOTTOM, GSP_BGR8_OES);
 		switch (game_state) {
 			case STATE_LEVEL_SELECT:
 				level_select_loop();
