@@ -137,6 +137,7 @@ void game_loop() {
 			C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
 			C3D_AlphaBlend(GPU_BLEND_ADD, GPU_BLEND_ADD, GPU_SRC_ALPHA, GPU_ONE_MINUS_SRC_ALPHA, GPU_ONE, GPU_ZERO);
 			C2D_SceneBegin(top);
+			scale_view();
 			
 			draw_background(cam_x / 8, -(cam_y / 8) + 200);
 
@@ -184,10 +185,6 @@ int main(int argc, char* argv[]) {
 		no_dsp_firmware();
 	}
 
-	u8 isNot2DS;
-	CFGU_GetModelNintendo2DS(&isNot2DS);
-	if (!isNot2DS && !is_citra()) gfxSetWide(true);	
- 
 	ui_assets_init();
 	
 	bgSheet = C2D_SpriteSheetLoad("romfs:/gfx/bg.t3x");
@@ -203,8 +200,9 @@ int main(int argc, char* argv[]) {
 	spriteSheet2 = C2D_SpriteSheetLoad("romfs:/gfx/portals.t3x");
 	if (!spriteSheet2) svcBreak(USERBREAK_PANIC);
 
-	top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
+	top = C2D_CreateScreenTargetExt(GFX_TOP, GFX_LEFT, aaEnabled);
 	bot = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
+
 
 	bool exit = false;
 	while (aptMainLoop() && !exit) {

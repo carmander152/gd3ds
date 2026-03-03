@@ -16,6 +16,9 @@
 #define MAX_SPRITES   8192
 #define SCALE (SCREEN_HEIGHT / (11.f * 30))
 
+extern bool aaEnabled;
+extern bool wideEnabled;
+
 // Simple sprite struct
 typedef struct
 {

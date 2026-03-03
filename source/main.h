@@ -20,3 +20,5 @@ extern int game_state;
 
 extern float cam_x;
 extern float cam_y;
+
+bool is_citra();

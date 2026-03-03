@@ -1,5 +1,7 @@
 #include "gfx.h"
 #include "math_helpers.h"
+#include "graphics.h"
+#include "main.h"
 
 void set_scissor(GPU_SCISSORMODE mode, int x, int y, int width, int height) {
     int screen_width = GSP_SCREEN_HEIGHT_BOTTOM;
@@ -133,6 +135,38 @@ void draw_9_slice(const C2D_Image atlas, const float x, const float y, const int
 
 #undef TILE
 
+#define DISPLAY_FLAGS (GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) | \
+                GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8))
+
+C3D_RenderTarget* C2D_CreateScreenTargetExt(gfxScreen_t screen, gfx3dSide_t side, bool aa) {
+	int height;
+	switch (screen)
+	{
+		default:
+		case GFX_BOTTOM:
+			height = GSP_SCREEN_HEIGHT_BOTTOM;
+			break;
+		case GFX_TOP:
+			height = (wideEnabled || aa) ? GSP_SCREEN_HEIGHT_TOP_2X : GSP_SCREEN_HEIGHT_TOP;
+			break;
+	}
+    int width = aa ? 480 : 240;
+
+    u32 transferFlags = DISPLAY_FLAGS;
+    if (aa && !wideEnabled)
+        transferFlags |= GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_XY);
+    else if (aa && wideEnabled)
+        transferFlags |= GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_X);
+    else
+        transferFlags |= GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO);
+
+
+    C3D_RenderTarget* target = C3D_RenderTargetCreate(width, height, GPU_RB_RGBA8, GPU_RB_DEPTH16);
+    if (target) C3D_RenderTargetSetOutput(target, screen, side, transferFlags);
+
+	return target;
+}
+
 int fade_status = FADE_STATUS_NONE;
 float opacity = 0;
 
@@ -161,4 +195,31 @@ void draw_fade() {
 
 void set_fade_status(int status) {
     fade_status = status;
+}
+
+void scale_view() {
+    if (aaEnabled && !wideEnabled)
+        C2D_ViewScale(2,2);
+    else if (aaEnabled && wideEnabled)
+        C2D_ViewScale(2,2);
+}
+
+void reinitialize_screens() {
+    C3D_RenderTargetDelete(top);
+    C3D_RenderTargetDelete(bot);
+    top = C2D_CreateScreenTargetExt(GFX_TOP, GFX_LEFT, aaEnabled);
+    bot = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
+}
+
+void set_wide(bool wide) {
+	u8 isNot2DS;
+	CFGU_GetModelNintendo2DS(&isNot2DS);
+	if (!isNot2DS && !is_citra()) {
+		wideEnabled = wide;
+		gfxSetWide(wide);	
+	}
+}
+
+void set_aa(bool aa) {
+    aaEnabled = aa;
 }

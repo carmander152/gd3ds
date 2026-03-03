@@ -12,6 +12,7 @@
 #include "easing.h"
 #include "color_channels.h"
 #include "mp3_player.h"
+#include "graphics.h"
 
 #include "level/main_levels.h"
 
@@ -204,6 +205,8 @@ UIAction actions_top[] = {
 
 };
 
+int mode = 0;
+
 void level_select_loop() {
 	start_level = false;
 	ui_load_screen(&screen, actions, sizeof(actions) / sizeof(actions[0]), "romfs:/menus/level_select.txt");
@@ -267,6 +270,29 @@ void level_select_loop() {
 			break; // break in order to return to hbmenu
 		}
 
+		if (kDown & KEY_X) {
+			if (++mode == 4) mode = 0;
+			switch (mode) {
+				case 0:
+					set_wide(false);
+					set_aa(false);
+					break;
+				case 1:
+					set_wide(true);
+					set_aa(false);
+					break;
+				case 2:
+					set_wide(false);
+					set_aa(true);
+					break;
+				case 3:
+					set_wide(true);
+					set_aa(true);
+					break;
+			}
+			reinitialize_screens();
+		}
+
 		UIInput touch;
 		touchPosition touchPos;
 		hidTouchRead(&touchPos);
@@ -295,9 +321,13 @@ void level_select_loop() {
 
 			C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
 			C2D_SceneBegin(top);
+			scale_view();
 
 			ui_screen_draw(&screen_top);
+			draw_text(bigFont_fontCharset, bigFont_sheet, 0, 6, 0.5f, 0, "Wide: %d", wideEnabled);
+			draw_text(bigFont_fontCharset, bigFont_sheet, 0, 18, 0.5f, 0, "AA: %d", aaEnabled);
 			draw_fade();
+			C2D_ViewReset();
 			
 			C3D_FrameEnd(0);
 		} while (handle_fading());

@@ -4,6 +4,9 @@
 #include "math_helpers.h"
 #include "color_channels.h"
 
+bool aaEnabled = false;
+bool wideEnabled = false;
+
 int sprite_count = 0;
 
 C2D_SpriteSheet spriteSheet;
