@@ -1,8 +1,9 @@
 #pragma once
 #include "ui_element.h"
+#include "ui_button.h"
 
-#define CHECKBOX_HOVER_SCALE 1.25f
-#define CHECKBOX_HOVER_ANIM_TIME 0.5f
+#define CHECKBOX_HOVER_SCALE BUTTON_HOVER_SCALE
+#define CHECKBOX_HOVER_ANIM_TIME BUTTON_HOVER_ANIM_TIME
 
 UIElement ui_create_checkbox(
     int x, int y, bool enabled,

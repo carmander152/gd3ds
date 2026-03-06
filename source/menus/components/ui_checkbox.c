@@ -62,6 +62,9 @@ static void ui_checkbox_update(UIElement* e, UIInput* touch) {
     if (e->checkbox.hovered && releasedTouch) {
         e->checkbox.checked ^= 1;
         e->checkbox.pressed = false;
+        e->checkbox.hovered = false;
+        e->checkbox.hoverTimer = 0.f;
+        e->checkbox.hoverScale = 1.f;
         if (e->action)
             e->action(e->action_data);
         set_checkbox_texture(e, e->checkbox.checked);

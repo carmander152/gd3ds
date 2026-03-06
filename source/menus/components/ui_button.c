@@ -44,6 +44,9 @@ static void ui_button_update(UIElement* e, UIInput* touch) {
     // If released on button, do its action
     if (e->button.hovered && releasedTouch) {
         e->button.pressed = false;
+        e->button.hovered = false;
+        e->button.hoverTimer = 0.f;
+        e->button.hoverScale = 1.f;
         if (e->action)
             e->action(e->action_data);
     }
