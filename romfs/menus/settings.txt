@@ -11,3 +11,6 @@ label x=90 y=85 text="800px res" scale=0.4 tag="page1"
 
 checkbox x=75 y=115 tag="page1,chk_aa" scale=0.8 action="aa"
 label x=90 y=115 text="AntiAliasing" scale=0.4 tag="page1"
+
+checkbox x=75 y=145 tag="page1,chk_glow" scale=0.8 action="glow"
+label x=90 y=145 text="Object glow" scale=0.4 tag="page1"

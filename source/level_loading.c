@@ -978,7 +978,7 @@ void set_color_channels() {
                 break;
 
             default:
-                if (id < COL_CHANNEL_NUM) {
+                if (id < CHANNEL_P1) {
                     memset(&channels[id], 0, sizeof(ColorChannel));
                     Color color;
                     color.r = colorChannel.fromRed;
@@ -991,6 +991,10 @@ void set_color_channels() {
 
                     if (colorChannel.playerColor == 1) channels[id].color = p1_color;
                     if (colorChannel.playerColor == 2) channels[id].color = p2_color; 
+
+                    if (id == CHANNEL_OBJ) {
+                        channels[CHANNEL_OBJ_BLENDING].color = color;
+                    }
                 }
         }
     }

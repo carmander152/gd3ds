@@ -30,15 +30,18 @@ void wide_settings(UIElement* e) {
     wideEnabled = e->checkbox.checked;
 }
 
-
 void aa_settings(UIElement* e) {
     aaEnabled = e->checkbox.checked;
+}
+void glow_settings(UIElement* e) {
+    glowEnabled = e->checkbox.checked;
 }
 
 static UIAction actions[] = {
     { "exit", exit_settings },
     { "wide", wide_settings },
     { "aa", aa_settings },
+    { "glow", glow_settings },
 };
 
 
@@ -47,6 +50,7 @@ void settings_init() {
     yes_exit = false;
     ui_get_element_by_tag(&screen, "chk_wide")->checkbox.checked = wideEnabled;
     ui_get_element_by_tag(&screen, "chk_aa")->checkbox.checked = aaEnabled;
+    ui_get_element_by_tag(&screen, "chk_glow")->checkbox.checked = glowEnabled;
 }
 
 int settings_loop() {

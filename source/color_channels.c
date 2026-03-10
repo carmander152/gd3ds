@@ -68,6 +68,11 @@ void init_col_channels() {
     channels[CHANNEL_OBJ].color.g = 255;
     channels[CHANNEL_OBJ].color.b = 255;
     
+    channels[CHANNEL_OBJ_BLENDING].color.r = 255;
+    channels[CHANNEL_OBJ_BLENDING].color.g = 255;
+    channels[CHANNEL_OBJ_BLENDING].color.b = 255;
+    channels[CHANNEL_OBJ_BLENDING].blending = true;
+    
     channels[CHANNEL_3DL].color.r = 255;
     channels[CHANNEL_3DL].color.g = 255;
     channels[CHANNEL_3DL].color.b = 255;
@@ -227,6 +232,7 @@ void run_trigger(int obj) {
         
         case OBJ_TRIGGER:
             upload_to_buffer(obj, CHANNEL_OBJ);
+            upload_to_buffer(obj, CHANNEL_OBJ_BLENDING);
             break;
         
         case OBJ_2_TRIGGER:
@@ -312,6 +318,11 @@ void calculate_lbg() {
     unsigned char r,g,b;
 
     convertHSVtoRGB(h, s, v, &r, &g, &b);
+
+    channels[CHANNEL_LBG_NOLERP].color.r = r;
+    channels[CHANNEL_LBG_NOLERP].color.g = g;
+    channels[CHANNEL_LBG_NOLERP].color.b = b;
+    channels[CHANNEL_LBG_NOLERP].blending = true;
 
     float factor = (channel.color.r + channel.color.g + channel.color.b) / 150.f;
 

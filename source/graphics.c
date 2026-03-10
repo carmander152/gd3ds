@@ -7,11 +7,13 @@
 
 bool aaEnabled = false;
 bool wideEnabled = false;
+bool glowEnabled = true;
 
 int sprite_count = 0;
 
 C2D_SpriteSheet spriteSheet;
 C2D_SpriteSheet spriteSheet2;
+C2D_SpriteSheet glowSheet;
 C2D_SpriteSheet bgSheet;
 C2D_SpriteSheet groundSheet;
 
@@ -25,6 +27,7 @@ int current_fading_effect = FADE_NONE;
 
 typedef struct {
     C2D_Sprite parent_template;
+    C2D_Sprite glow_template;
     int child_count;
     C2D_Sprite *child_templates;
 } SpriteTemplate;
@@ -53,6 +56,12 @@ void cache_all_sprites() {
 
         C2D_SpriteFromSheet(&sprite_templates[id].parent_template, *sheet, tex);
         C2D_SpriteSetCenter(&sprite_templates[id].parent_template, 0.5f, 0.5f);
+
+		// Get glow frame
+		if (obj->glow_frame >= 0) {
+			C2D_SpriteFromSheet(&sprite_templates[id].glow_template, glowSheet, obj->glow_frame);
+			C2D_SpriteSetCenter(&sprite_templates[id].glow_template, 0.5f, 0.5f);
+		}
 
         // Children
         sprite_templates[id].child_count = obj->child_count;
@@ -141,6 +150,36 @@ float get_fading_obj_fade(float x, float right_edge) {
         return 0.05f;
 }
 
+int get_glow_channel(int id) {
+	switch (id) {
+		case 143:
+		case 144:
+		case 145:
+		case 146:
+		case 147:
+		case 177:
+		case 178:
+		case 179:
+		case 183:
+		case 184:
+		case 185:
+		case 186:
+		case 187:
+		case 188:
+		case 204:
+		case 205:
+		case 206:
+		case 459:
+		case 673:
+		case 674:
+		case 740:
+		case 741:
+		case 742:
+			return CHANNEL_LBG_NOLERP;
+	}
+	return CHANNEL_OBJ_BLENDING;
+}
+
 void spawn_object_at(
 	int obj_game,
     int id,
@@ -185,7 +224,7 @@ void spawn_object_at(
 
 		vo->spr = sprite_templates[id].parent_template;
 
-		C2D_SpriteSetPos(&vo->spr, p_x, p_y);
+		C2D_SpriteSetPos(&vo->spr, (int)p_x, (int)p_y);
 		C2D_SpriteSetScale(&vo->spr, sx, sy);
 		C2D_SpriteSetRotation(&vo->spr, rad);
 
@@ -197,6 +236,26 @@ void spawn_object_at(
 		viewable_objects_ptr[sprite_count] = vo;
 		sprite_count++;
 	}
+
+	// Skip if no glow frame
+	if (glowEnabled && obj->glow_frame >= 0) {
+		SpriteObject *vo = &viewable_objects[sprite_count];
+
+		vo->spr = sprite_templates[id].glow_template;
+
+		C2D_SpriteSetPos(&vo->spr, (int)x, (int)y);
+		C2D_SpriteSetScale(&vo->spr, sx, sy);
+		C2D_SpriteSetRotation(&vo->spr, rad);
+
+		vo->obj = obj_game;
+		vo->layer = 1;
+		vo->col_type = COLOR_TYPE_GLOW;
+		vo->opacity = 0.5f;
+		vo->col_channel = get_glow_channel(id);
+		viewable_objects_ptr[sprite_count] = vo;
+		sprite_count++;
+	}
+
     // Render children
     for (int i = 0; i < obj->child_count; i++) {
 		const ChildSprite* c = &obj->children[i];
@@ -221,13 +280,13 @@ void spawn_object_at(
 				
 			vo->spr = sprite_templates[id].child_templates[i]; 
 
-			C2D_SpriteSetPos(&vo->spr, c_x, c_y);
+			C2D_SpriteSetPos(&vo->spr, (int)c_x, (int)c_y);
 			C2D_SpriteSetScale(&vo->spr, c->scale_x * c_flip_x_mult * sx,
 										  c->scale_y * c_flip_y_mult * sy);
 			C2D_SpriteSetRotation(&vo->spr, C3D_AngleFromDegrees(c->rot) + rad);
 
 			vo->obj = obj_game;
-			vo->layer = i + 1;
+			vo->layer = i + 2;
 			vo->col_type = c->color_type;
 			vo->opacity = c->opacity;
 			vo->col_channel = get_color_channel(c->color_type, obj_game, obj);
@@ -246,20 +305,29 @@ static inline uint32_t make_sort_key(const SpriteObject *s)
 
 	// Blending makes zlayer one 
 	int col_channel = objects.col_channel[obj];
-	if (col_channel > 0 && (channels[col_channel].blending ^ ((zlayer & 1) == 0))) {
+
+	if (s->layer == 1) {
+		zlayer--;
+	} else if (col_channel > 0 && (channels[col_channel].blending ^ ((zlayer & 1) == 0))) {
 		zlayer--;
 	}
 
     int child_z = 0;
 	int tex = game_obj->texture;
-    if (s->layer > 0) {
-        child_z = game_obj->children[s->layer - 1].z;
-        tex = game_obj->children[s->layer - 1].texture;
+
+    if (s->layer > 1) {
+        child_z = game_obj->children[s->layer - 2].z;
+        tex = game_obj->children[s->layer - 2].texture;
     }
-
-	int sheet = tex < SPRITESHEET2_START ? 1 : 0;
-
-    int zorder = objects.zorder[obj] ? objects.zorder[obj] : game_obj->z_order;
+	
+	int sheet;
+	if (s->layer == 1) {
+		sheet = 2;
+	} else {
+		sheet = tex < SPRITESHEET2_START ? 1 : 0;
+	}
+	
+	int zorder = objects.zorder[obj] ? objects.zorder[obj] : game_obj->z_order;
 
 
     uint32_t zl = (uint32_t)(zlayer + 8);     // fits in 7 bits
@@ -330,16 +398,19 @@ int get_object_layers(int id) {
 
 bool object_fades(int obj) {
 	switch (objects.id[obj]) {
-		case 146:
-		case 147:
-		case 206:
-		case 204:
-		case 673:
-		case 674:
 		case 144:
 		case 145:
+		case 146:
+		case 147:
+		case 204:
 		case 205:
+		case 206:
 		case 459:
+		case 673:
+		case 674:
+		case 740:
+		case 741:
+		case 742:
 			return true;
 	}
 	return false;

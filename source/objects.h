@@ -16,7 +16,8 @@ typedef enum {
    COLOR_TYPE_BASE = 0,
    COLOR_TYPE_DETAIL,
    COLOR_TYPE_BLACK,
-   COLOR_TYPE_WHITE
+   COLOR_TYPE_WHITE,
+   COLOR_TYPE_GLOW,
 } ColorType;
 
 typedef enum {
@@ -45,6 +46,7 @@ typedef struct {
 
 typedef struct {
     int texture;
+    int glow_frame;
     float x, y;
     int z_layer;
     int z_order;

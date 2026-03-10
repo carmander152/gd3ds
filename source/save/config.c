@@ -20,9 +20,11 @@ void cfg_init() {
 
 	config_set_bool(&cfg, CONFIG_GRAPHICS_PATH "aaEnabled", config_get_bool(&cfg, CONFIG_GRAPHICS_PATH "aaEnabled", false));
 	config_set_bool(&cfg, CONFIG_GRAPHICS_PATH "wideEnabled", config_get_bool(&cfg, CONFIG_GRAPHICS_PATH "wideEnabled", false));
+	config_set_bool(&cfg, CONFIG_GRAPHICS_PATH "glowEnabled", config_get_bool(&cfg, CONFIG_GRAPHICS_PATH "glowEnabled", true));
 
 	set_aa(config_get_bool(&cfg, CONFIG_GRAPHICS_PATH "aaEnabled", false));
 	set_wide(config_get_bool(&cfg, CONFIG_GRAPHICS_PATH "wideEnabled", false));
+	glowEnabled = config_get_bool(&cfg, CONFIG_GRAPHICS_PATH "glowEnabled", true);
 
 	config_save(&cfg);
 }
@@ -30,6 +32,7 @@ void cfg_init() {
 void cfg_save() {
     config_set_bool(&cfg, CONFIG_GRAPHICS_PATH "aaEnabled", aaEnabled);
     config_set_bool(&cfg, CONFIG_GRAPHICS_PATH "wideEnabled", wideEnabled);
+    config_set_bool(&cfg, CONFIG_GRAPHICS_PATH "glowEnabled", glowEnabled);
 
     config_save(&cfg);
 }

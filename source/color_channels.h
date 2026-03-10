@@ -17,6 +17,8 @@ enum ColorChannelIDs {
     CHANNEL_P1,
     CHANNEL_P2,
     CHANNEL_LBG,
+    CHANNEL_LBG_NOLERP,
+    CHANNEL_OBJ_BLENDING,
     COL_CHANNEL_NUM,
 };
 

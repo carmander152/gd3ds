@@ -18,6 +18,7 @@
 
 extern bool aaEnabled;
 extern bool wideEnabled;
+extern bool glowEnabled; 
 
 // Simple sprite struct
 typedef struct
@@ -68,6 +69,7 @@ extern int current_fading_effect;
 extern int sprite_count;
 extern C2D_SpriteSheet spriteSheet;
 extern C2D_SpriteSheet spriteSheet2;
+extern C2D_SpriteSheet glowSheet;
 extern C2D_SpriteSheet bgSheet;
 extern C2D_SpriteSheet groundSheet;
 
