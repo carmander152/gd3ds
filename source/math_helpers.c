@@ -27,3 +27,12 @@ Color color_lerp(Color color1, Color color2, float fraction) {
 
     return returned;
 }
+
+// Generic easing out function, not from GD
+float ease_out(float current, float target, float smoothing) {
+    return current + (target - current) * smoothing;
+}
+
+float map_range(float val, float min1, float max1, float min2, float max2) {
+    return min2 + ((max2 - min2) / (max1 - min1)) * (val - min1);
+}

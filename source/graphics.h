@@ -20,6 +20,8 @@ extern bool aaEnabled;
 extern bool wideEnabled;
 extern bool glowEnabled; 
 
+extern int current_pulserod_ball_image;
+
 // Simple sprite struct
 typedef struct
 {
@@ -61,6 +63,13 @@ enum FadingEffects {
     FADE_COUNT
 };
 
+typedef struct {
+    C2D_Sprite parent_template;
+    C2D_Sprite glow_template;
+    int child_count;
+    C2D_Sprite *child_templates;
+} SpriteTemplate;
+
 void cache_all_sprites();
 void free_cached_sprites();
 
@@ -72,6 +81,8 @@ extern C2D_SpriteSheet spriteSheet2;
 extern C2D_SpriteSheet glowSheet;
 extern C2D_SpriteSheet bgSheet;
 extern C2D_SpriteSheet groundSheet;
+
+extern SpriteTemplate sprite_templates[GAME_OBJECT_COUNT];
 
 void draw_objects();
 void draw_background(float x, float y);

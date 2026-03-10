@@ -26,6 +26,8 @@ static volatile bool looping = false;
 static volatile bool skip = false;
 static volatile bool paused = false;
 
+volatile float amplitude = 0;
+
 static Thread threadId = NULL;
 
 static ndspWaveBuf waveBuf[NUM_BUFS];
@@ -123,6 +125,63 @@ u32 decode_mp3(void* buffer)
 	return done / (sizeof(int16_t));
 }
 
+float calculate_amplitude(float power) {
+    static float prev = 0.0f;
+    static float pulse = 0.0f;
+    static float avg_delta = 0.0f;
+    static float prev_power = 0.0f;
+
+    float delta = power - prev;
+    float abs_delta = fabsf(delta);
+
+    // Low-pass filter the delta
+    avg_delta = avg_delta + ((abs_delta - avg_delta) * 0.1f);
+
+    // Detect note change: large RMS increase indicates a new note
+    float rms_delta = power - prev_power;
+    float abs_rms_delta = fabsf(rms_delta);
+    float rms_thresh = avg_delta * POWER_THRESH_MULTIPLIER;
+
+    if (abs_rms_delta > rms_thresh && rms_delta > 0.0f) {
+        // Note changed, do pulse
+        pulse = 1.0f;
+    }
+
+    pulse *= AMP_I_DECAY;
+
+    if (pulse > 1.0f) pulse = 1.0f;
+    if (pulse < 0.1f) pulse = 0.1f;
+
+    prev = power;
+    prev_power = power;
+
+    return pulse;
+}
+
+float calculate_power(int16_t *samples, size_t frames, int channels) {
+    uint64_t sum_squares = 0;
+    uint32_t count = 0;
+
+    for (size_t i = 0; i < frames; i++) {
+        int16_t mono;
+
+        if (channels == 2) {
+            int16_t left  = samples[i*2];
+            int16_t right = samples[i*2 + 1];
+            mono = (left + right) / 2;
+        } else {
+            mono = samples[i];
+        }
+
+        sum_squares += mono * mono;
+        count++;
+    }
+
+    if (count == 0) return 0.0f;
+
+    return ((float)sum_squares / count) / (32768.0f * 32768.0f);
+}
+
 void audio_thread(void *const file) {
     skip = false;
     bool lastbuf = false;
@@ -139,6 +198,16 @@ void audio_thread(void *const file) {
                 LightLock_Lock(&decoderLock);
                 size_t read = decode_mp3(buf->data_pcm16);
                 LightLock_Unlock(&decoderLock);
+
+                if (read > 0) {
+                    size_t frames = read / (sizeof(int16_t) * channels_mp3());
+
+                    float rms = calculate_power((int16_t*)buf->data_pcm16,
+                                            frames,
+                                            channels_mp3());
+
+                    amplitude = calculate_amplitude(rms);
+                }
 
                 if (read == 0) {
                     if (looping) {

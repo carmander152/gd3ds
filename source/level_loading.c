@@ -9,6 +9,7 @@
 #include "color_channels.h"
 #include "objects.h"
 #include "mp3_player.h"
+#include "graphics.h"
 
 ObjectsArray objects = { 0 };
 
@@ -948,6 +949,7 @@ bool parse_string(const char *levelString) {
     }
     
     int objectCount = sectionCount - 1;
+
     printf("%d\n", objectCount);
     
     if (!init_arrays(objectCount)) {
@@ -1007,6 +1009,12 @@ void set_color_channels() {
     }
 }
 
+const int rod_images[3] = {
+	833,
+	834,
+	835
+};
+
 int load_level(char *path) {
     size_t out;
 	char *level = read_file(path, &out);
@@ -1032,6 +1040,18 @@ int load_level(char *path) {
 
     init_col_channels();
     set_color_channels();
+
+    // Set pulserod pulse ball image
+    current_pulserod_ball_image = rand() % 3;
+
+    C2D_SpriteFromSheet(&sprite_templates[15].child_templates[0], spriteSheet, rod_images[current_pulserod_ball_image]);
+    C2D_SpriteSetCenter(&sprite_templates[15].child_templates[0], 0.5f, 0.5f);
+    
+    C2D_SpriteFromSheet(&sprite_templates[16].child_templates[0], spriteSheet, rod_images[current_pulserod_ball_image]);
+    C2D_SpriteSetCenter(&sprite_templates[16].child_templates[0], 0.5f, 0.5f);
+
+    C2D_SpriteFromSheet(&sprite_templates[17].child_templates[0], spriteSheet, rod_images[current_pulserod_ball_image]);
+    C2D_SpriteSetCenter(&sprite_templates[17].child_templates[0], 0.5f, 0.5f);
 
     return 0;
 }

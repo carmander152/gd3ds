@@ -4,6 +4,7 @@
 #include "math_helpers.h"
 #include "color_channels.h"
 #include <stdlib.h>
+#include "mp3_player.h"
 
 bool aaEnabled = false;
 bool wideEnabled = false;
@@ -24,13 +25,7 @@ static SpriteObject viewable_objects[MAX_SPRITES];
 static SpriteObject *viewable_objects_ptr[MAX_SPRITES];
 
 int current_fading_effect = FADE_NONE;
-
-typedef struct {
-    C2D_Sprite parent_template;
-    C2D_Sprite glow_template;
-    int child_count;
-    C2D_Sprite *child_templates;
-} SpriteTemplate;
+int current_pulserod_ball_image = 0;
 
 SpriteTemplate sprite_templates[GAME_OBJECT_COUNT]; // global cache
 
@@ -257,6 +252,45 @@ float get_rotation_speed(int id) {
     return 0.f;
 }
 
+
+float get_object_pulse(float amplitude, int id, int layer) {
+    switch (id) {
+        case 36:
+        case 84:
+        case 141:
+            return map_range(amplitude, 0.f, 1.f, 0.3f, 1.2f);
+		case 15:
+		case 16:
+		case 17:
+			if (layer == 2) {	
+            	return amplitude;
+			}
+			return 1.0f;
+        case 50:
+        case 51:
+        case 52:
+        case 53:
+        case 54:
+        case 60:
+        case 148:
+        case 149:
+        case 405:
+            return amplitude;
+        case 132:
+        case 133:
+        case 136:
+        case 150:
+        case 236:
+        case 460:
+        case 494:
+        case 495:
+        case 496:
+        case 497:
+            return map_range(amplitude, 0.f, 1.f, 0.6f, 1.2f);
+    }
+    return 1.f;
+}
+
 void spawn_object_at(
 	int obj_game,
     int id,
@@ -309,8 +343,10 @@ void spawn_object_at(
 			C2D_SpriteSetCenter(&vo->spr, 0.5f, 0.5f);
 		}
 
+		float pulse_scale = get_object_pulse(amplitude, id, 0);
+
 		C2D_SpriteSetPos(&vo->spr, (int)p_x, (int)p_y);
-		C2D_SpriteSetScale(&vo->spr, sx, sy);
+		C2D_SpriteSetScale(&vo->spr, sx * pulse_scale, sy * pulse_scale);
 		C2D_SpriteSetRotation(&vo->spr, rad);
 
 		vo->obj = obj_game;
@@ -328,8 +364,10 @@ void spawn_object_at(
 
 		vo->spr = sprite_templates[id].glow_template;
 
+		float pulse_scale = get_object_pulse(amplitude, id, 1);
+
 		C2D_SpriteSetPos(&vo->spr, (int)x, (int)y);
-		C2D_SpriteSetScale(&vo->spr, sx, sy);
+		C2D_SpriteSetScale(&vo->spr, sx * pulse_scale, sy * pulse_scale);
 		C2D_SpriteSetRotation(&vo->spr, rad);
 
 		vo->obj = obj_game;
@@ -365,9 +403,11 @@ void spawn_object_at(
 				
 			vo->spr = sprite_templates[id].child_templates[i]; 
 
+			float pulse_scale = get_object_pulse(amplitude, id, i + 2);
+
 			C2D_SpriteSetPos(&vo->spr, (int)c_x, (int)c_y);
-			C2D_SpriteSetScale(&vo->spr, c->scale_x * c_flip_x_mult * sx,
-										  c->scale_y * c_flip_y_mult * sy);
+			C2D_SpriteSetScale(&vo->spr, c->scale_x * c_flip_x_mult * sx * pulse_scale,
+										  c->scale_y * c_flip_y_mult * sy * pulse_scale);
 			C2D_SpriteSetRotation(&vo->spr, C3D_AngleFromDegrees(c->rot) + rad);
 
 			vo->obj = obj_game;
@@ -401,7 +441,7 @@ static inline uint32_t make_sort_key(const SpriteObject *s)
 	int tex = game_obj->texture;
 
     if (s->layer > 1) {
-        child_z = game_obj->children[s->layer - 2].z;
+        child_z = game_obj->children[s->layer - 2].z - 1;
         tex = game_obj->children[s->layer - 2].texture;
     }
 	
@@ -563,6 +603,7 @@ int get_opacity(int obj, float x) {
 
     return opacity;
 }
+
 
 void handle_special_fading(int obj, float calc_x, float calc_y) {
     switch (current_fading_effect) {

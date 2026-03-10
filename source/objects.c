@@ -1372,6 +1372,18 @@ const ObjectHitbox hitbox_1910[] = {
     { HITBOX_SOLID, 0.00, 0.00, 15.00, 15.00, COLLISION_BOX }
 };
 
+const ChildSprite children_15[] = {
+ { 833, 0.00, 35.00, 1.00, 1.00, 0, 0, -1, 0.00, COLOR_TYPE_BASE, 1.00 },
+};
+
+const ChildSprite children_16[] = {
+ { 833, 0.00, 27.50, 1.00, 1.00, 0, 0, -1, 0.00, COLOR_TYPE_BASE, 1.00 },
+};
+
+const ChildSprite children_17[] = {
+ { 833, 0.00, 20.00, 1.00, 1.00, 0, 0, -1, 0.00, COLOR_TYPE_BASE, 1.00 },
+};
+
 const ChildSprite children_40[] = {
  { 805, 0.00, 0.00, 1.00, 1.00, 0, 0, -1, 0.00, COLOR_TYPE_BLACK, 1.00 },
 };
@@ -2144,9 +2156,9 @@ const GameObject game_objects[GAME_OBJECT_COUNT] = {
     { 1067, -1, 5.00, 0.00, 5, 10, 0, COLOR_TYPE_WHITE, 0, 1.00, 0, NULL, hitbox_12 },
     { 1071, -1, 5.00, 0.00, 5, 10, 0, COLOR_TYPE_WHITE, 0, 1.00, 0, NULL, hitbox_13 },
     { -1, -1, 0.0f, 0.0f, 0, 0, 0, 0, 0, 1.f, 0, NULL, NULL },
-    { 830, -1, 0.00, 0.00, 1, -6, 1004, COLOR_TYPE_BASE, 0, 1.00, 0, NULL, NULL },
-    { 831, -1, 0.00, 0.00, 1, -6, 1004, COLOR_TYPE_BASE, 0, 1.00, 0, NULL, NULL },
-    { 832, -1, 0.00, 0.00, 1, -6, 1004, COLOR_TYPE_BASE, 0, 1.00, 0, NULL, NULL },
+    { 830, -1, 0.00, 0.00, 1, -6, 1005, COLOR_TYPE_BLACK, 0, 1.00, 1, children_15, NULL },
+    { 831, -1, 0.00, 0.00, 1, -6, 1005, COLOR_TYPE_BLACK, 0, 1.00, 1, children_16, NULL },
+    { 832, -1, 0.00, 0.00, 1, -6, 1005, COLOR_TYPE_BLACK, 0, 1.00, 1, children_17, NULL },
     { 376, -1, 0.00, 0.00, 3, 9, 1005, COLOR_TYPE_DETAIL, 1, 1.00, 0, NULL, NULL },
     { 377, -1, 0.00, 0.00, 3, 9, 1005, COLOR_TYPE_DETAIL, 1, 1.00, 0, NULL, NULL },
     { 378, -1, 0.00, 0.00, 3, 9, 1005, COLOR_TYPE_DETAIL, 1, 1.00, 0, NULL, NULL },
