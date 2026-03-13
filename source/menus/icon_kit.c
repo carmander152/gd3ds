@@ -159,7 +159,7 @@ static void action_exit(UIElement* e) {
 static void move_index_left(UIElement* e) {
 	*current_pages[gamemode_page] -= 1;
 	if (*current_pages[gamemode_page] < 0) {
-		*current_pages[gamemode_page] = gamemode_icon_count[gamemode_page] / ICONS_PER_PAGE;
+		*current_pages[gamemode_page] = (gamemode_icon_count[gamemode_page] - 2) / ICONS_PER_PAGE;
 	}
 	icon_counter = 1;
 	ui_run_func_on_tag(&screen, "icon", set_icon_index); 
@@ -167,7 +167,7 @@ static void move_index_left(UIElement* e) {
 
 static void move_index_right(UIElement* e) {
 	*current_pages[gamemode_page] += 1;
-	if (*current_pages[gamemode_page] * ICONS_PER_PAGE >= gamemode_icon_count[gamemode_page]) {
+	if ((*current_pages[gamemode_page] * ICONS_PER_PAGE) + 1 >= gamemode_icon_count[gamemode_page]) {
 		*current_pages[gamemode_page] = 0;
 	}
 	icon_counter = 1;
