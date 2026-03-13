@@ -46,7 +46,7 @@ static UIAction actions[] = {
 
 
 void settings_init() {
-	ui_load_screen(&screen, actions, sizeof(actions) / sizeof(actions[0]), "romfs:/menus/settings.txt");
+    ui_load_screen(&screen, actions, sizeof(actions) / sizeof(actions[0]), "romfs:/menus/settings.txt");
     yes_exit = false;
     ui_get_element_by_tag(&screen, "chk_wide")->checkbox.checked = wideEnabled;
     ui_get_element_by_tag(&screen, "chk_aa")->checkbox.checked = aaEnabled;

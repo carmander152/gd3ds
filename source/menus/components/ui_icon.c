@@ -83,8 +83,8 @@ static void ui_icon_draw(UIElement* e) {
         0,
         0,
         scale * e->icon.scaleX,
-		C2D_Color32(175, 175, 175, 255),
-		C2D_Color32(255, 255, 255, 255),
+        C2D_Color32(175, 175, 175, 255),
+        C2D_Color32(255, 255, 255, 255),
         0
     );
 

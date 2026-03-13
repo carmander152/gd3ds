@@ -59,14 +59,14 @@ static UIAction actions_top[] = {
 void main_menu_loop() {
     exit_flag = false;
     new_state = 0;
-	ui_load_screen(&screen, actions, sizeof(actions) / sizeof(actions[0]), "romfs:/menus/main_menu.txt");
-	ui_load_screen(&screen_top, actions_top, sizeof(actions_top) / sizeof(actions_top[0]), "romfs:/menus/main_menu_top.txt");
+    ui_load_screen(&screen, actions, sizeof(actions) / sizeof(actions[0]), "romfs:/menus/main_menu.txt");
+    ui_load_screen(&screen_top, actions_top, sizeof(actions_top) / sizeof(actions_top[0]), "romfs:/menus/main_menu_top.txt");
     
     main_menu_color_index = 0;
     u32 color = default_lvl_colors[main_menu_color_index % NUM_MENU_COLORS];
 
     Color col;
-	col.r = GET_R(color);
+    col.r = GET_R(color);
     col.g = GET_G(color);
     col.b = GET_B(color);
 
@@ -74,43 +74,43 @@ void main_menu_loop() {
     channels[CHANNEL_GROUND].color = col;
     channels[CHANNEL_LINE].color = white;
 
-	set_fade_status(FADE_STATUS_IN);
+    set_fade_status(FADE_STATUS_IN);
 
-	if (!playing_menu_loop) {
-		play_mp3("romfs:/songs/menuLoop.mp3", true);
-		playing_menu_loop = true;
-	}
+    if (!playing_menu_loop) {
+        play_mp3("romfs:/songs/menuLoop.mp3", true);
+        playing_menu_loop = true;
+    }
 
-	get_buffer(CHANNEL_BG)->active = false;
-	get_buffer(CHANNEL_GROUND)->active = false;
-	get_buffer(CHANNEL_LINE)->active = false;
+    get_buffer(CHANNEL_BG)->active = false;
+    get_buffer(CHANNEL_GROUND)->active = false;
+    get_buffer(CHANNEL_LINE)->active = false;
 
-	bool old_wide = wideEnabled;
-	bool old_aa = aaEnabled;
-	
-	while (aptMainLoop()) {
-		hidScanInput();
-		u32 kDown = hidKeysDown();
+    bool old_wide = wideEnabled;
+    bool old_aa = aaEnabled;
+    
+    while (aptMainLoop()) {
+        hidScanInput();
+        u32 kDown = hidKeysDown();
 
-		if (kDown & KEY_SELECT) {
-			game_state = STATE_EXIT;
+        if (kDown & KEY_SELECT) {
+            game_state = STATE_EXIT;
             stop_mp3();
-			break; // break in order to return to hbmenu
-		}
+            break; // break in order to return to hbmenu
+        }
 
         if (kDown & KEY_START) {
-			action_open_level_select(NULL);
-		}
+            action_open_level_select(NULL);
+        }
 
-		UIInput touch;
-		touchPosition touchPos;
-		hidTouchRead(&touchPos);
-		touch.touchPosition = touchPos;
-		touch.did_something = false;
-		touch.interacted = false;
+        UIInput touch;
+        touchPosition touchPos;
+        hidTouchRead(&touchPos);
+        touch.touchPosition = touchPos;
+        touch.did_something = false;
+        touch.interacted = false;
 
-		handle_col_channel(CHANNEL_BG);
-		handle_col_channel(CHANNEL_GROUND);
+        handle_col_channel(CHANNEL_BG);
+        handle_col_channel(CHANNEL_GROUND);
 
         ColTriggerBuffer *trig = get_buffer(CHANNEL_BG);
         if (!trig->active) {
@@ -119,48 +119,48 @@ void main_menu_loop() {
             main_menu_color_index++;
         }
 
-		// Check for changes
-		if (aaEnabled != old_aa) {	
-			gspWaitForVBlank();
-			set_aa(aaEnabled);
-			gspWaitForVBlank();
-			reinitialize_screens();
-			old_aa = aaEnabled;
-		}
+        // Check for changes
+        if (aaEnabled != old_aa) {    
+            gspWaitForVBlank();
+            set_aa(aaEnabled);
+            gspWaitForVBlank();
+            reinitialize_screens();
+            old_aa = aaEnabled;
+        }
 
-		if (wideEnabled != old_wide) {		
-			gspWaitForVBlank();
-			set_wide(wideEnabled);
-			gspWaitForVBlank();
-			reinitialize_screens();
-			old_wide = wideEnabled;
-		}
+        if (wideEnabled != old_wide) {        
+            gspWaitForVBlank();
+            set_wide(wideEnabled);
+            gspWaitForVBlank();
+            reinitialize_screens();
+            old_wide = wideEnabled;
+        }
 
-		if (!in_settings) ui_screen_update(&screen, &touch);
-		ui_screen_update(&screen_top, &touch);
-		do {
+        if (!in_settings) ui_screen_update(&screen, &touch);
+        ui_screen_update(&screen_top, &touch);
+        do {
             bg_scroll += 5.19300155f;
-			C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-			
-			// Top screen
-			C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
-			C2D_SceneBegin(top);
-			scale_view();
-			draw_fade();
+            C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+            
+            // Top screen
+            C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
+            C2D_SceneBegin(top);
+            scale_view();
+            draw_fade();
 
             draw_background(-40 + (bg_scroll / 8), 0);
-			ui_screen_draw(&screen_top);
+            ui_screen_draw(&screen_top);
 
-			// Bottom Screen
-			C2D_TargetClear(bot, C2D_Color32(0, 0, 0, 255));
-			C2D_SceneBegin(bot);
+            // Bottom Screen
+            C2D_TargetClear(bot, C2D_Color32(0, 0, 0, 255));
+            C2D_SceneBegin(bot);
 
             draw_background(bg_scroll / 8, SCREEN_HEIGHT);
             C2D_ViewScale(SCALE, SCALE);
             draw_ground(bg_scroll, 0, 0, false, 320);
-			C2D_ViewScale(1/SCALE, 1/SCALE);
+            C2D_ViewScale(1/SCALE, 1/SCALE);
 
-			ui_screen_draw(&screen);
+            ui_screen_draw(&screen);
             if (in_settings) {
                 int returned = settings_loop();
                 if (returned) {
@@ -170,13 +170,13 @@ void main_menu_loop() {
 
             C2D_ViewReset();
 
-			C3D_FrameEnd(0);
-		} while (handle_fading());
+            C3D_FrameEnd(0);
+        } while (handle_fading());
 
-		if (new_state) {
-			game_state = new_state;
-			break;
-		}
-	}
-	C2D_TargetClear(bot, C2D_Color32(0, 0, 0, 255));
+        if (new_state) {
+            game_state = new_state;
+            break;
+        }
+    }
+    C2D_TargetClear(bot, C2D_Color32(0, 0, 0, 255));
 }

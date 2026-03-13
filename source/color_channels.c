@@ -70,7 +70,7 @@ void init_col_channels() {
     channels[CHANNEL_3DL].color.g = 255;
     channels[CHANNEL_3DL].color.b = 255;
     
-	channels[CHANNEL_P1].color = get_white_if_black(p1_color);
+    channels[CHANNEL_P1].color = get_white_if_black(p1_color);
     channels[CHANNEL_P1].blending = true;
         
     channels[CHANNEL_P2].color = get_white_if_black(p2_color);

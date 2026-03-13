@@ -197,12 +197,12 @@ void ui_set_pos_on_tag(UIScreen *screen, float x, float y, const char *tag) {
 }
 
 void ui_enable_element(UIElement *e) { 
-	e->enabled = true;
+    e->enabled = true;
 };
 
 void ui_disable_element(UIElement *e) { 
-	e->enabled = false;
-	if (e->type == UI_BUTTON) {
+    e->enabled = false;
+    if (e->type == UI_BUTTON) {
         e->button.hovered = false;
         e->button.hoverScale = 1.f;
         e->button.hoverTimer = 0.f;

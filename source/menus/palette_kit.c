@@ -202,27 +202,27 @@ static void disable_all_color_buttons(UIElement *e) {
 
 static void set_p1_page(UIElement *e) {    
     ui_run_func_on_tag(&screen, "color_buttons", disable_all_color_buttons);
-	ui_window_button_set_style(e, 5);
+    ui_window_button_set_style(e, 5);
     color_page = 0;
-	color_counter = 0;
+    color_counter = 0;
     ui_run_func_on_tag(&screen, "glow_option", disable_glow_setting);
     ui_run_func_on_tag(&screen, "color", set_color_index);
 }
 
 static void set_p2_page(UIElement *e) {
     ui_run_func_on_tag(&screen, "color_buttons", disable_all_color_buttons);
-	ui_window_button_set_style(e, 5);
+    ui_window_button_set_style(e, 5);
     color_page = 1;
-	color_counter = 0;
+    color_counter = 0;
     ui_run_func_on_tag(&screen, "glow_option", disable_glow_setting);
     ui_run_func_on_tag(&screen, "color", set_color_index);
 }
 
 static void set_glow_page(UIElement *e) {
     ui_run_func_on_tag(&screen, "color_buttons", disable_all_color_buttons);
-	ui_window_button_set_style(e, 5);
+    ui_window_button_set_style(e, 5);
     color_page = 2;
-	color_counter = 0;
+    color_counter = 0;
     ui_run_func_on_tag(&screen, "glow_option", enable_glow_setting);
     ui_run_func_on_tag(&screen, "color", set_color_index);
 }
@@ -242,9 +242,9 @@ static UIAction actions[] = {
 
 
 void palette_kit_init() {
-	ui_load_screen(&screen, actions, sizeof(actions) / sizeof(actions[0]), "romfs:/menus/palette_kit.txt");
+    ui_load_screen(&screen, actions, sizeof(actions) / sizeof(actions[0]), "romfs:/menus/palette_kit.txt");
     yes_exit = false;
-	ui_window_set_tint(ui_get_element_by_tag(&screen, "bg_window"), C2D_Color32(0, 0, 0, 64));
+    ui_window_set_tint(ui_get_element_by_tag(&screen, "bg_window"), C2D_Color32(0, 0, 0, 64));
     color_counter = 0;
     color_page = 0;
     ui_run_func_on_tag(&screen, "color", set_color_index);

@@ -1010,18 +1010,18 @@ void set_color_channels() {
 }
 
 const int rod_images[3] = {
-	634,
-	635,
-	636
+    634,
+    635,
+    636
 };
 
 int load_level(char *path) {
     size_t out;
-	char *level = read_file(path, &out);
-	if (!level) return 1;
+    char *level = read_file(path, &out);
+    if (!level) return 1;
 
-	char *data = decompress_level(level);
-	if (data) {
+    char *data = decompress_level(level);
+    if (data) {
         // Get level starting colors
         char *metaStr = get_metadata_value(data, "kS38");
         channelCount = parse_color_channels(metaStr, &colorChannels);

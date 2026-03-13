@@ -141,20 +141,20 @@ void draw_9_slice(const C2D_Image atlas, const float x, const float y, const int
 
 C3D_RenderTarget* C2D_CreateScreenTargetExt(gfxScreen_t screen, gfx3dSide_t side, bool aa) {
     u8 model;
-	CFGU_GetSystemModel(&model);
+    CFGU_GetSystemModel(&model);
     bool wide = wideEnabled && model != CFG_MODEL_2DS && !is_citra() && screen == GFX_TOP;
 
-	int height;
-	switch (screen)
-	{
-		default:
-		case GFX_BOTTOM:
-			height = GSP_SCREEN_HEIGHT_BOTTOM * (aa ? 2 : 1);
-			break;
-		case GFX_TOP:
-			height = (wide || aa) ? GSP_SCREEN_HEIGHT_TOP_2X : GSP_SCREEN_HEIGHT_TOP;
-			break;
-	}
+    int height;
+    switch (screen)
+    {
+        default:
+        case GFX_BOTTOM:
+            height = GSP_SCREEN_HEIGHT_BOTTOM * (aa ? 2 : 1);
+            break;
+        case GFX_TOP:
+            height = (wide || aa) ? GSP_SCREEN_HEIGHT_TOP_2X : GSP_SCREEN_HEIGHT_TOP;
+            break;
+    }
     int width = aa ? 480 : 240;
 
     u32 transferFlags = DISPLAY_FLAGS;
@@ -168,7 +168,7 @@ C3D_RenderTarget* C2D_CreateScreenTargetExt(gfxScreen_t screen, gfx3dSide_t side
     C3D_RenderTarget* target = C3D_RenderTargetCreate(width, height, GPU_RB_RGBA8, GPU_RB_DEPTH16);
     if (target) C3D_RenderTargetSetOutput(target, screen, side, transferFlags);
 
-	return target;
+    return target;
 }
 
 int fade_status = FADE_STATUS_NONE;
@@ -214,12 +214,12 @@ void reinitialize_screens() {
 }
 
 void set_wide(bool wide) {
-	u8 model;
-	CFGU_GetSystemModel(&model);
-	if (model != CFG_MODEL_2DS && !is_citra()) {
-		wideEnabled = wide;
-		gfxSetWide(wide);	
-	}
+    u8 model;
+    CFGU_GetSystemModel(&model);
+    if (model != CFG_MODEL_2DS && !is_citra()) {
+        wideEnabled = wide;
+        gfxSetWide(wide);    
+    }
 }
 
 void set_aa(bool aa) {

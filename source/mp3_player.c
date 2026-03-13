@@ -34,27 +34,27 @@ static ndspWaveBuf waveBuf[NUM_BUFS];
 
 static inline u32 samplerate_mp3(void)
 {
-	return rate;
+    return rate;
 }
 
 static inline u32 buffsize_mp3(void)
 {
-	return buffSize;
+    return buffSize;
 }
 
 static inline u32 channels_mp3(void)
 {
-	return audio_channels;
+    return audio_channels;
 }
 
 static void audioCallback(void *const nul_) {
-	(void)nul_;  // Unused
+    (void)nul_;  // Unused
 
-	if(quit || skip) { // Quit flag
-		return;
-	}
+    if(quit || skip) { // Quit flag
+        return;
+    }
     
-	LightEvent_Signal(&soundEvent);
+    LightEvent_Signal(&soundEvent);
 }
 
 
@@ -82,8 +82,8 @@ void audio_exit() {
     ndspChnReset(MUSIC_CHANNEL);
     linearFree(audioBuffer);
     mpg123_close(mh);
-	mpg123_delete(mh);
-	mpg123_exit();
+    mpg123_delete(mh);
+    mpg123_exit();
 }
 
 bool mp3_init(void *file) {
@@ -120,9 +120,9 @@ bool mp3_init(void *file) {
 
 u32 decode_mp3(void* buffer)
 {
-	size_t done = 0;
-	mpg123_read(mh, (unsigned char *)(buffer), buffSize, &done);
-	return done / (sizeof(int16_t));
+    size_t done = 0;
+    mpg123_read(mh, (unsigned char *)(buffer), buffSize, &done);
+    return done / (sizeof(int16_t));
 }
 
 float calculate_amplitude(float power) {
@@ -276,17 +276,17 @@ void seek_mp3(float time) {
 
     int location = time * samplerate_mp3();
     if (!quit) {
-		bool oldstate = ndspChnIsPaused(MUSIC_CHANNEL);
-		ndspChnSetPaused(MUSIC_CHANNEL, true); //Pause playback...
-		seek(location);
-		ndspChnSetPaused(MUSIC_CHANNEL, oldstate); //once the seeking is done, playback can continue.
-	}
+        bool oldstate = ndspChnIsPaused(MUSIC_CHANNEL);
+        ndspChnSetPaused(MUSIC_CHANNEL, true); //Pause playback...
+        seek(location);
+        ndspChnSetPaused(MUSIC_CHANNEL, oldstate); //once the seeking is done, playback can continue.
+    }
 }
 
 // Pause or unpause playback
 void toggle_playback_mp3() {
     paused = !ndspChnIsPaused(MUSIC_CHANNEL);
-	ndspChnSetPaused(MUSIC_CHANNEL, paused);
+    ndspChnSetPaused(MUSIC_CHANNEL, paused);
 }
 
 // Stop playback
@@ -294,7 +294,7 @@ void stop_mp3() {
     if (!quit && threadId) {
         quit = true;
         
-	    LightEvent_Signal(&soundEvent);
+        LightEvent_Signal(&soundEvent);
         
         threadJoin(threadId, U64_MAX);
         

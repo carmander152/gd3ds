@@ -48,39 +48,39 @@ size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 }
 
 int soc_init() {
-	int ret;
+    int ret;
 
-	// allocate buffer for SOC service
-	SOC_buffer = (u32*)memalign(SOC_ALIGN, SOC_BUFFERSIZE);
+    // allocate buffer for SOC service
+    SOC_buffer = (u32*)memalign(SOC_ALIGN, SOC_BUFFERSIZE);
 
-	if(SOC_buffer == NULL) {
-		printf("memalign: failed to allocate\n");
-	}
+    if(SOC_buffer == NULL) {
+        printf("memalign: failed to allocate\n");
+    }
 
-	// Now intialise soc:u service
-	if ((ret = socInit(SOC_buffer, SOC_BUFFERSIZE)) != 0) {
-    	printf("socInit: 0x%08X\n", (unsigned int)ret);
-	}
-	return ret;
+    // Now intialise soc:u service
+    if ((ret = socInit(SOC_buffer, SOC_BUFFERSIZE)) != 0) {
+        printf("socInit: 0x%08X\n", (unsigned int)ret);
+    }
+    return ret;
 }
 
 int get_level_from_id(char **out_data, int id) {
     // Init
-	CURL *curl = curl_easy_init();
+    CURL *curl = curl_easy_init();
     struct curl_slist *headers = NULL;
 
     if (curl) {
-		struct MemoryStruct chunk;
-		chunk.memory = malloc(1);
-		chunk.size = 0;
+        struct MemoryStruct chunk;
+        chunk.memory = malloc(1);
+        chunk.size = 0;
         headers = curl_slist_append(headers,
             "Content-Type: application/x-www-form-urlencoded");
 
         curl_easy_setopt(curl, CURLOPT_URL, "http://www.boomlings.com/database/downloadGJLevel22.php");
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "");
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
         char data[64];
         snprintf(data, 63, "levelID=%d&secret=Wmfd2893gb7", id);
@@ -95,12 +95,12 @@ int get_level_from_id(char **out_data, int id) {
             return 1;
         }
 
-		printf("(code %d) Response (%d): %s\n", code, chunk.size, chunk.memory);
+        printf("(code %d) Response (%d): %s\n", code, chunk.size, chunk.memory);
 
         if (chunk.memory[0] == '-') {
             return atoi(chunk.memory);
         }
-		
+        
         *out_data = chunk.memory;
 
         return 0;
@@ -109,6 +109,6 @@ int get_level_from_id(char **out_data, int id) {
 }
 
 void soc_exit() {
-	close(sock);
-	socExit();
+    close(sock);
+    socExit();
 }
