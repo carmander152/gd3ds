@@ -29,6 +29,8 @@ typedef struct {
     int *zlayer, *zorder;
     float *trig_duration;
 
+    float *width, *height;
+
     unsigned short *v1p9_col_channel;
     unsigned short *col_channel;
     unsigned short *detail_col_channel;

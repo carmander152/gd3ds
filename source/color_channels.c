@@ -7,6 +7,8 @@
 #include "main.h"
 #include "graphics.h"
 
+#include "state.h"
+
 Color p1_color;
 Color p2_color;
 Color glow_color;
@@ -260,7 +262,7 @@ void run_trigger(int obj) {
 }
 
 void handle_triggers() {
-    int cam_sx = (int)((cam_x + SCREEN_WIDTH / 2) / SECTION_SIZE);
+    int cam_sx = (int)((state.player.x) / SECTION_SIZE);
     
     int section = cam_sx;
     if (section < 0) return;
@@ -285,7 +287,7 @@ void handle_triggers() {
             //    )) {
             //        run_trigger(obj);
             //    }
-            if (objects.x[obj] < cam_x + SCREEN_WIDTH / 2) {
+            if (objects.x[obj] < state.player.x) {
                 run_trigger(obj);
             }
         }

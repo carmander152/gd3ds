@@ -24,11 +24,11 @@
 #include "menus/icon_kit.h"
 #include "menus/components/ui_screen.h"
 
+#include "player/collision.h"
+#include "state.h"
+
 #define CITRA_TYPE 0x20000
 #define CITRA_VERSION 11
-
-float cam_x = 0;
-float cam_y = 0;
 
 int game_state = STATE_MAIN_MENU;
 
@@ -83,14 +83,16 @@ void game_loop() {
     toggle_playback_mp3();
 
     printf("\x1b[8;1HUse dpad to move camera");
-    cam_x = 0;
-    cam_y = 0;
+    state.camera_x = 0;
+    state.camera_y = 0;
     current_fading_effect = FADE_NONE;
 
     set_fade_status(FADE_STATUS_IN);
 
     bool being_faded = true;
     bool exiting = false;
+
+    init_variables();
 
     // Main loop
     while (aptMainLoop()) {
@@ -112,19 +114,27 @@ void game_loop() {
         u32 kHeld = hidKeysHeld();
         
         if (kHeld & KEY_UP) {
-            cam_y += CAM_SPEED;
+            state.camera_y += CAM_SPEED;
         }
         
         if (kHeld & KEY_DOWN) {
-            cam_y -= CAM_SPEED;
+            state.camera_y -= CAM_SPEED;
         }
 
         if (kHeld & KEY_RIGHT) {
-            cam_x += CAM_SPEED;
+            state.camera_x += CAM_SPEED;
         }
         
         if (kHeld & KEY_LEFT) {
-            cam_x -= CAM_SPEED;
+            state.camera_x -= CAM_SPEED;
+        }
+
+        for (size_t i = 0; i < 4; i++) {
+            state.old_player = state.player;
+            state.player.on_ground = false;
+            collide_with_objects(&state.player);
+            run_player(&state.player);
+            run_camera();
         }
 
         handle_triggers();
@@ -140,13 +150,13 @@ void game_loop() {
             C2D_SceneBegin(top);
             scale_view();
             
-            draw_background(cam_x / 8, -(cam_y / 8) + 200);
+            draw_background(state.camera_x / 8, -(state.camera_y / 8) + 200);
 
             C2D_ViewScale(SCALE, SCALE);
 
             draw_objects();
 
-            draw_ground(cam_x, cam_y, 0, false, SCREEN_WIDTH);
+            draw_ground(state.camera_x, state.camera_y, 0, false, SCREEN_WIDTH);
             draw_fade();
             C2D_ViewScale(1/SCALE, 1/SCALE);
 

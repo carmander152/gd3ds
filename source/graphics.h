@@ -88,6 +88,13 @@ extern SpriteTemplate sprite_templates[GAME_OBJECT_COUNT];
 
 extern const Color white;
 
+inline float normalize_angle(float a)
+{
+    while (a < 0.0f)   a += 360.0f;
+    while (a >= 360.0f) a -= 360.0f;
+    return a;
+}
+
 Color get_white_if_black(Color color);
 void draw_objects();
 void draw_background(float x, float y);

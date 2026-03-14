@@ -1,0 +1,124 @@
+#pragma once
+
+#include <stdbool.h>
+#include "level_loading.h"
+#include "icons.h"
+
+#define STEPS_DT (1.f/240)
+
+typedef struct {
+    int slope_id;
+    float elapsed;
+    bool snapDown;
+} SlopeData;
+
+typedef struct {
+    float width;
+    float height;
+} InternalHitbox;
+
+typedef struct {
+    float x;
+    float y;
+    
+    float vel_x;
+    float vel_y;
+
+    float delta_y;
+    
+    float gravity;
+
+    float rotation;
+    float lerp_rotation;
+    
+    float width;
+    float height;
+
+    InternalHitbox internal_hitbox;
+
+    int gamemode;
+
+    bool on_ground;
+    bool on_ceiling;
+    bool mini;
+    bool upside_down;
+    bool touching_slope;
+    bool inverse_rotation;
+    bool snap_rotation;
+    
+    int potentialSlope_id;
+
+    bool left_ground;
+
+    float ball_rotation_speed;
+
+    float cutscene_timer;
+
+    int buffering_state;
+
+    float time_since_ground;
+    
+    float ufo_last_y;
+
+    float ceiling_inv_time;
+
+    float timeElapsed;
+
+    int gravObj_id;
+
+    float cutscene_initial_player_x;
+    float cutscene_initial_player_y;
+
+    int slope_slide_coyote_time;
+
+    SlopeData coyote_slope;
+    SlopeData slope_data;
+} Player;
+
+enum BufferingState {
+    BUFFER_NONE,
+    BUFFER_READY,
+    BUFFER_END
+};
+
+extern const float player_speeds[4];
+
+inline float getTop(Player *player)  { return player->y + player->height / 2; }
+inline float getBottom(Player *player)  { return player->y - player->height / 2; }
+
+inline float getGroundTop(Player *player)  { return player->y + (player->height / 2) + ((player->gamemode == GAMEMODE_DART) ? (player->mini ? 3 : 5) : 0); }
+inline float getGroundBottom(Player *player)  { return player->y - (player->height / 2) - ((player->gamemode == GAMEMODE_DART) ? (player->mini ? 3 : 5) : 0); }
+
+inline float getRight(Player *player)  { return player->x + player->width / 2; }
+inline float getLeft(Player *player)  { return player->x - player->width / 2; }
+
+inline float getInternalTop(Player *player)  { return player->y + player->internal_hitbox.height / 2; }
+inline float getInternalBottom(Player *player)  { return player->y - player->internal_hitbox.height / 2; }
+inline float getInternalRight(Player *player)  { return player->x + player->internal_hitbox.width / 2; }
+inline float getInternalLeft(Player *player)  { return player->x - player->internal_hitbox.width / 2; }
+
+inline float gravBottom(Player *player) { return player->upside_down ? -getTop(player) : getBottom(player); }
+inline float gravTop(Player *player) { return player->upside_down ? -getBottom(player) : getTop(player); }
+
+inline float gravInternalBottom(Player *player) { return player->upside_down ? -getInternalTop(player) : getInternalBottom(player); }
+inline float gravInternalTop(Player *player) { return player->upside_down ? -getInternalBottom(player) : getInternalTop(player); }
+
+inline float grav(Player *player, float val) { return player->upside_down ? -val : val; }
+
+inline float obj_getTop(int object)  { 
+    return objects.y[object] + objects.height[object] / 2; 
+}
+inline float obj_getBottom(int object)  { 
+    return objects.y[object] - objects.height[object] / 2; 
+}
+inline float obj_getRight(int object)  {  
+    return objects.x[object] + objects.width[object] / 2; 
+}
+inline float obj_getLeft(int object)  { 
+    return objects.x[object] - objects.width[object] / 2; 
+}
+inline float obj_gravBottom(Player *player, int object) { return player->upside_down ? -obj_getTop(object) : obj_getBottom(object); }
+inline float obj_gravTop(Player *player, int object) { return player->upside_down ? -obj_getBottom(object) : obj_getTop(object); }
+
+void draw_player(Player *player);
+void run_player(Player *player);

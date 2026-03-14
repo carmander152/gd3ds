@@ -9,6 +9,9 @@
 #include "menus/icon_kit.h"
 #include "menus/palette_kit.h"
 
+#include "player/player.h"
+#include "state.h"
+
 const Color white = { 255, 255, 255 };
 
 bool aaEnabled = false;
@@ -122,13 +125,6 @@ void free_cached_sprites() {
         if (sprite_templates[i].child_templates)
             free(sprite_templates[i].child_templates);
     }
-}
-
-static inline float normalize_angle(float a)
-{
-    while (a < 0.0f)   a += 360.0f;
-    while (a >= 360.0f) a -= 360.0f;
-    return a;
 }
 
 float mirror_angle(float angle, bool hflip, bool vflip)
@@ -463,6 +459,11 @@ void spawn_object_at(
 static inline uint32_t make_sort_key(const SpriteObject *s)
 {
     const int obj = s->obj;
+
+    if (obj == -1) {
+        return ((5 + 8) << 17) | (0 << 16) | (0 << 8) | 0;
+    }
+
     const int id = objects.id[obj];
     const GameObject *game_obj = &game_objects[id];
 
@@ -824,8 +825,21 @@ void draw_ground(float cam_x, float cam_y, float y, bool is_ceiling, int screen_
 void draw_objects() {
     sprite_count = 0;
 
+    // Player sprite
+    SpriteObject *vo = &viewable_objects[sprite_count];
+
+    C2D_Sprite spr = { 0 };
+    vo->spr = spr;
+    vo->obj = -1;
+    vo->layer = 0;
+    vo->col_type = 0;
+    vo->opacity = 1.f;
+    vo->col_channel = 0;
+    viewable_objects_ptr[sprite_count] = vo;
+    sprite_count++;
+
     int width = (SCREEN_WIDTH / 2) / SECTION_SIZE + 2;
-    int cam_sx = (int)((cam_x + SCREEN_WIDTH / 2) / SECTION_SIZE);
+    int cam_sx = (int)((state.camera_x + SCREEN_WIDTH / 2) / SECTION_SIZE);
 
     // Create sprites
     for (int x = -width; x <= width; x++) {
@@ -836,8 +850,8 @@ void draw_objects() {
         for (int i = 0; i < sec->object_count; i++) {
             int obj = sec->objects[i];
             
-            float calc_x = ((objects.x[obj] - cam_x));
-            float calc_y = SCREEN_HEIGHT - ((objects.y[obj] - cam_y));  
+            float calc_x = ((objects.x[obj] - state.camera_x));
+            float calc_y = SCREEN_HEIGHT - ((objects.y[obj] - state.camera_y));  
             if (calc_x < -60 || calc_x >= (SCREEN_WIDTH / SCALE) + 60) continue;
             if (calc_y < -60 || calc_y >= (SCREEN_HEIGHT / SCALE) + 60) continue;
 
@@ -887,51 +901,57 @@ void draw_objects() {
     C2D_ImageTint tint = { 0 };
     for (size_t s = 0; s < sprite_count; s++) {
         SpriteObject *obj = viewable_objects_ptr[s];
-        
-        int col_channel = obj->col_channel;
 
-        ColorChannel col;
-
-        if (col_channel < 0) {
-            col.color.r = 255;
-            col.color.g = 255;
-            col.color.b = 255;
-            col.blending = false;
-        }else {
-            col = channels[col_channel];
-        }
-        
-        if (col.blending && !blend_enabled) {
-            change_blending(true);
-            blend_enabled = true;
-        } else if (!col.blending && blend_enabled) {
+        if (obj->obj == -1) {
             change_blending(false);
             blend_enabled = false;
+            draw_player(&state.player);
+        } else {   
+            int col_channel = obj->col_channel;
+
+            ColorChannel col;
+
+            if (col_channel < 0) {
+                col.color.r = 255;
+                col.color.g = 255;
+                col.color.b = 255;
+                col.blending = false;
+            }else {
+                col = channels[col_channel];
+            }
+            
+            if (col.blending && !blend_enabled) {
+                change_blending(true);
+                blend_enabled = true;
+            } else if (!col.blending && blend_enabled) {
+                change_blending(false);
+                blend_enabled = false;
+            }
+            
+            int game_object = obj->obj;
+            float x = ((objects.x[game_object] - state.camera_x));
+            
+            float opacity = obj->opacity;
+            if (object_fades(game_object)) {
+                opacity *= get_fading_obj_fade(x, SCREEN_WIDTH / SCALE);
+            }
+            
+            int fade_x = 0;
+            int fade_y = 0;
+
+            float fade_scale = 1.f;
+
+            get_fade_vars(game_object, x, &fade_x, &fade_y, &fade_scale);
+
+
+            C2D_SpriteMove(&obj->spr, fade_x, fade_y);
+
+            // Cull invisible objects
+            if ((col.color.r | col.color.g | col.color.b) == 0 && blend_enabled) continue;
+            
+            C2D_PlainImageTint(&tint, C2D_Color32(col.color.r, col.color.g, col.color.b, get_opacity(game_object, x) * opacity), 1.f);
+            C2D_DrawSpriteTinted(&obj->spr, &tint);
         }
-        
-        int game_object = obj->obj;
-        float x = ((objects.x[game_object] - cam_x));
-        
-        float opacity = obj->opacity;
-        if (object_fades(game_object)) {
-            opacity *= get_fading_obj_fade(x, SCREEN_WIDTH / SCALE);
-        }
-        
-        int fade_x = 0;
-        int fade_y = 0;
-
-        float fade_scale = 1.f;
-
-        get_fade_vars(game_object, x, &fade_x, &fade_y, &fade_scale);
-
-
-        C2D_SpriteMove(&obj->spr, fade_x, fade_y);
-
-        // Cull invisible objects
-        if ((col.color.r | col.color.g | col.color.b) == 0 && blend_enabled) continue;
-        
-        C2D_PlainImageTint(&tint, C2D_Color32(col.color.r, col.color.g, col.color.b, get_opacity(game_object, x) * opacity), 1.f);
-        C2D_DrawSpriteTinted(&obj->spr, &tint);
     }
 }
 

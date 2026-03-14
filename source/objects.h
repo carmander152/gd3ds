@@ -39,8 +39,8 @@ typedef struct {
 
 typedef struct {
    int collision_type;
-   float width, height;
    float x, y;
+   float width, height;
    int type;
 } ObjectHitbox;
 

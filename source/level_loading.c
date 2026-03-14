@@ -804,6 +804,13 @@ int parse_gd_object(const char *objStr, int obj) {
 
     objects.random[obj] = rand();
 
+
+    const ObjectHitbox *hitbox = game_object->hitbox;
+    if (hitbox) {
+        objects.width[obj] = hitbox->width;
+        objects.height[obj] = hitbox->height;
+    }
+
     free_string_array(tokens, count);
     return 1;
 }
@@ -817,6 +824,8 @@ void free_arrays() {
     if (objects.zlayer)             { free(objects.zlayer);             objects.zlayer = NULL; }
     if (objects.zorder)             { free(objects.zorder);             objects.zorder = NULL; }
     if (objects.trig_duration)      { free(objects.trig_duration);      objects.trig_duration = NULL; }
+    if (objects.width)              { free(objects.width);              objects.width = NULL; }
+    if (objects.height)             { free(objects.height);             objects.height = NULL; }
     if (objects.v1p9_col_channel)   { free(objects.v1p9_col_channel);   objects.v1p9_col_channel = NULL; }
     if (objects.col_channel)        { free(objects.col_channel);        objects.col_channel = NULL; }
     if (objects.detail_col_channel) { free(objects.detail_col_channel); objects.detail_col_channel = NULL; }
@@ -859,6 +868,12 @@ bool init_arrays(int count) {
     
     objects.trig_duration = malloc(sizeof(float) * count);
     if (!objects.trig_duration) return false;
+    
+    objects.width = malloc(sizeof(float) * count);
+    if (!objects.width) return false;
+    
+    objects.height = malloc(sizeof(float) * count);
+    if (!objects.height) return false;
 
     objects.v1p9_col_channel = malloc(sizeof(unsigned short) * count);
     if (!objects.v1p9_col_channel) return false;
@@ -916,6 +931,8 @@ bool init_arrays(int count) {
     memset(objects.zlayer,             0, sizeof(int) * count);
     memset(objects.zorder,             0, sizeof(int) * count);
     memset(objects.trig_duration,      0, sizeof(float) * count);
+    memset(objects.width,              0, sizeof(float) * count);
+    memset(objects.height,             0, sizeof(float) * count);
     memset(objects.v1p9_col_channel,   0, sizeof(unsigned short) * count);
     memset(objects.col_channel,        0, sizeof(unsigned short) * count);
     memset(objects.detail_col_channel, 0, sizeof(unsigned short) * count);

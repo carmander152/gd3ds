@@ -23,7 +23,4 @@ extern C3D_RenderTarget* bot;
 extern int game_state;
 extern bool playing_menu_loop;
 
-extern float cam_x;
-extern float cam_y;
-
 bool is_citra();
