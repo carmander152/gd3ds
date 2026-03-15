@@ -118,8 +118,15 @@ void game_loop() {
         state.input.holdJump = (state.input.pressedJump || (kHeld & KEY_A) || (kHeld & KEY_TOUCH)) == true;
 
         for (size_t i = 0; i < 4; i++) {
+            state.current_player = 0;
             state.old_player = state.player;
             handle_player(&state.player);
+            if (state.dual) {
+                // Run second player
+                state.old_player = state.player2;
+                state.current_player = 1;
+                handle_player(&state.player2);
+            }
             run_camera();
         }
 

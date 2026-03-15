@@ -911,7 +911,12 @@ void draw_objects() {
         if (obj->obj == -1) {
             change_blending(false);
             blend_enabled = false;
+            state.current_player = 0;
             draw_player(&state.player);
+            if (state.dual) {
+                state.current_player = 1;
+                draw_player(&state.player2);
+            }
         } else {   
             int col_channel = obj->col_channel;
 

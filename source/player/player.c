@@ -419,6 +419,15 @@ void draw_player(Player *player) {
     MotionTrail_Draw(&trail);
     MotionTrail_DrawWaveTrail(&wave_trail);*/
 
+    u32 primary_color = C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255);
+    u32 secondary_color = C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255);
+
+    if (state.current_player == 1) {
+        u32 tmp = primary_color;
+        primary_color = secondary_color;
+        secondary_color = tmp;
+    }
+
 
     float scale = (player->mini) ? 0.6f : 1.f;
 
@@ -446,46 +455,46 @@ void draw_player(Player *player) {
     switch (player->gamemode) {
         case GAMEMODE_PLAYER:
             spawn_icon_at(GAMEMODE_PLAYER, selected_cube, player_glow_enabled, calc_x, calc_y, player->lerp_rotation, false, false, scale, 
-                C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255),
-                C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255),
+                primary_color,
+                secondary_color,
                 C2D_Color32(glow_color.r, glow_color.g, glow_color.b, 255)
             );
             break;
         case GAMEMODE_SHIP:
             spawn_icon_at(GAMEMODE_PLAYER, selected_cube, player_glow_enabled, p_x, p_y, player->lerp_rotation, false, player->upside_down, scale * 0.5f, 
-                C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255),
-                C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255),
+                primary_color,
+                secondary_color,
                 C2D_Color32(glow_color.r, glow_color.g, glow_color.b, 255)
             );
             spawn_icon_at(GAMEMODE_SHIP, selected_ship, player_glow_enabled, calc_x, calc_y, player->lerp_rotation, false, player->upside_down, scale, 
-                C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255),
-                C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255),
+                primary_color,
+                secondary_color,
                 C2D_Color32(glow_color.r, glow_color.g, glow_color.b, 255)
             );
             break;
         case GAMEMODE_PLAYER_BALL:
             spawn_icon_at(GAMEMODE_PLAYER_BALL, selected_ball, player_glow_enabled, calc_x, calc_y, player->lerp_rotation, false, false, scale, 
-                C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255),
-                C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255),
+                primary_color,
+                secondary_color,
                 C2D_Color32(glow_color.r, glow_color.g, glow_color.b, 255)
             );
             break;
         case GAMEMODE_BIRD:
             spawn_icon_at(GAMEMODE_PLAYER, selected_cube, player_glow_enabled, p_x, p_y, player->lerp_rotation, false, player->upside_down, scale * 0.5f, 
-                C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255),
-                C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255),
+                primary_color,
+                secondary_color,
                 C2D_Color32(glow_color.r, glow_color.g, glow_color.b, 255)
             );
             spawn_icon_at(GAMEMODE_BIRD, selected_ufo, player_glow_enabled, calc_x, calc_y, player->lerp_rotation, false, player->upside_down, scale, 
-                C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255),
-                C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255),
+                primary_color,
+                secondary_color,
                 C2D_Color32(glow_color.r, glow_color.g, glow_color.b, 255)
             );
             break;    
         case GAMEMODE_DART:
             spawn_icon_at(GAMEMODE_DART, selected_wave, player_glow_enabled, calc_x, calc_y, player->lerp_rotation, false, false, scale, 
-                C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255),
-                C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255),
+                primary_color,
+                secondary_color,
                 C2D_Color32(glow_color.r, glow_color.g, glow_color.b, 255)
             );
             break;

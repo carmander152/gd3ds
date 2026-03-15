@@ -87,6 +87,13 @@ void set_dual_bounds() {
     set_intended_ceiling();
 }
 
+void setup_dual() {
+    memcpy(&state.player2, &state.player, sizeof(Player));
+    state.player2.upside_down = state.player.upside_down ^ 1;
+    set_dual_bounds();
+}
+
+
 void handle_special_hitbox(Player *player, int obj, const ObjectHitbox *hitbox) {
     switch (objects.id[obj]) {
         case YELLOW_PAD:
@@ -378,6 +385,44 @@ void handle_special_hitbox(Player *player, int obj, const ObjectHitbox *hitbox) 
                     set_dual_bounds();
                 } 
                 SET_ACTIVATED(obj, true);
+            }
+            break;
+        case DUAL_PORTAL:
+            player->gravObj_id = obj;
+            if (!GET_ACTIVATED(obj) && !state.dual) {
+                player->ceiling_inv_time = 0.1f;
+                state.dual = true;
+                state.dual_portal_y = objects.y[obj];
+                setup_dual();
+
+                SET_ACTIVATED(obj, true);
+            }
+            break;
+
+        case DIVORCE_PORTAL:
+            if (!GET_ACTIVATED(obj)) {
+
+                state.dual = false;
+                SET_ACTIVATED(obj, true);
+
+                if (state.current_player == 1) {
+                    memcpy(&state.player, player, sizeof(Player));
+                }
+                
+                switch (state.player.gamemode) {
+                    case GAMEMODE_PLAYER:
+                        state.ground_y = 0;
+                        state.ceiling_y = 999999;
+                        break;
+                    case GAMEMODE_SHIP:
+                    case GAMEMODE_BIRD:
+                        state.ceiling_y = state.ground_y + 300;
+                        set_intended_ceiling();
+                        break;
+                    case GAMEMODE_PLAYER_BALL:
+                        state.ceiling_y = state.ground_y + 240;
+                        set_intended_ceiling();
+                }
             }
             break;
     }
