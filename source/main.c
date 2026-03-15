@@ -115,7 +115,7 @@ void game_loop() {
 
         // Compare with true to store it in a single bit
         state.input.pressedJump = ((kDown & KEY_A) || (kDown & KEY_TOUCH)) == true;
-        state.input.holdJump = ((kHeld & KEY_A) || (kHeld & KEY_TOUCH)) == true;
+        state.input.holdJump = (state.input.pressedJump || (kHeld & KEY_A) || (kHeld & KEY_TOUCH)) == true;
 
         for (size_t i = 0; i < 4; i++) {
             state.old_player = state.player;

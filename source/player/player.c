@@ -452,7 +452,7 @@ void draw_player(Player *player) {
             );
             break;
         case GAMEMODE_SHIP:
-            spawn_icon_at(GAMEMODE_PLAYER, selected_cube, player_glow_enabled, p_x, p_y, player->lerp_rotation, false, false, scale * 0.5f, 
+            spawn_icon_at(GAMEMODE_PLAYER, selected_cube, player_glow_enabled, p_x, p_y, player->lerp_rotation, false, player->upside_down, scale * 0.5f, 
                 C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255),
                 C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255),
                 C2D_Color32(glow_color.r, glow_color.g, glow_color.b, 255)
@@ -471,7 +471,7 @@ void draw_player(Player *player) {
             );
             break;
         case GAMEMODE_BIRD:
-            spawn_icon_at(GAMEMODE_PLAYER, selected_cube, player_glow_enabled, p_x, p_y, player->lerp_rotation, false, false, scale * 0.5f, 
+            spawn_icon_at(GAMEMODE_PLAYER, selected_cube, player_glow_enabled, p_x, p_y, player->lerp_rotation, false, player->upside_down, scale * 0.5f, 
                 C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255),
                 C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255),
                 C2D_Color32(glow_color.r, glow_color.g, glow_color.b, 255)
