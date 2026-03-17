@@ -286,6 +286,8 @@ int main(int argc, char* argv[]) {
     top = C2D_CreateScreenTargetExt(GFX_TOP, GFX_LEFT, aaEnabled);
     bot = C2D_CreateScreenTargetExt(GFX_BOTTOM, GFX_LEFT, aaEnabled);
 
+    memset(&level_info, 0, sizeof(LoadedLevelInfo));
+
     bool exit = false;
     while (aptMainLoop() && !exit) {
         switch (game_state) {
