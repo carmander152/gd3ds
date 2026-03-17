@@ -3,8 +3,6 @@
 #include <3ds.h>
 #include "particle_definitions.h"
 
-#define MAX_PARTICLES 256
-
 // Struct of arrays my beloved
 typedef struct {
     int count;
@@ -70,6 +68,6 @@ typedef struct {
 
 void updateParticleSystem(ParticleSystem* ps, float dt);
 void initParticleData(ParticleData* d, int capacity);
-void initParticleSystem(ParticleSystem* ps, ParticleDefinition* cfg);
-void drawParticleSystem(ParticleSystem* ps, bool isStationary);
+void initParticleSystem(ParticleSystem* ps, const ParticleDefinition* cfg);
+void drawParticleSystem(ParticleSystem* ps, bool isStationary, float x_offset, float y_offset, float opacity);
 void freeParticleData(ParticleData* d);

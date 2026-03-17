@@ -11,6 +11,8 @@
 #include "mp3_player.h"
 #include "graphics.h"
 
+#include "player/collision.h"
+
 ObjectsArray objects = { 0 };
 
 Section *section_hash[SECTION_HASH_SIZE] = {0};
@@ -1121,6 +1123,7 @@ void reload_level() {
         objects.collided[i] = false;
         objects.hitbox_counter[i] = 0;
         objects.transition_applied[i] = FADE_NONE;
+        if (objects.id[i] == 0) objects.id[i] = BREAKABLE_BLOCK; 
     }
 
     init_col_channels();

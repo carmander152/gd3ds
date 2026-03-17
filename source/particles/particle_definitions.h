@@ -9,12 +9,12 @@ typedef enum {
 
 // Billion properties
 typedef struct {
-    int angle;
-    int angleVariance;
+    float angle;
+    float angleVariance;
     int blendFuncDestination;
     int blendFuncSource;
     float duration;
-    float emitterType;
+    int emitterType;
     float finishColorAlpha;
     float finishColorBlue;
     float finishColorGreen;
@@ -26,9 +26,9 @@ typedef struct {
     float finishParticleSize;
     float finishParticleSizeVariance;
     float gravityx;
-    int gravityy;
-    int maxParticles;
-    int maxRadius;
+    float gravityy;
+    float maxParticles;
+    float maxRadius;
     float maxRadiusVariance;
     float minRadius;
     float particleLifespan;
@@ -41,25 +41,28 @@ typedef struct {
     float rotationEndVariance;
     float rotationStart;
     float rotationStartVariance;
-    int sourcePositionVariancex;
-    int sourcePositionVariancey;
+    float sourcePositionVariancex;
+    float sourcePositionVariancey;
     float sourcePositionx;
     float sourcePositiony;
-    int speed;
-    int speedVariance;
-    int startColorAlpha;
+    float speed;
+    float speedVariance;
+    float startColorAlpha;
     float startColorBlue;
     float startColorGreen;
     float startColorRed;
-    int startColorVarianceAlpha;
+    float startColorVarianceAlpha;
     float startColorVarianceBlue;
     float startColorVarianceGreen;
     float startColorVarianceRed;
-    int startParticleSize;
-    int startParticleSizeVariance;
+    float startParticleSize;
+    float startParticleSizeVariance;
     float tangentialAccelVariance;
     float tangentialAcceleration;
     TextureFileName textureFileName;
 } ParticleDefinition;
 
-extern ParticleDefinition drag_effect;
+extern const ParticleDefinition drag_effect;
+extern const ParticleDefinition ring_effect;
+extern const ParticleDefinition portal_effect_01;
+extern const ParticleDefinition bump_effect;

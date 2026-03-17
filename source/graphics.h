@@ -77,6 +77,8 @@ typedef struct {
 
 void cache_all_sprites();
 void free_cached_sprites();
+void get_fade_vars(int obj, float x, int *fade_x, int *fade_y, float *fade_scale);
+int obj_edge_fade(float x, int right_edge);
 
 extern int current_fading_effect;
 

@@ -28,6 +28,7 @@
 #include "state.h"
 
 #include "particles/particles.h"
+#include "particles/object_particles.h"
 
 #define CITRA_TYPE 0x20000
 #define CITRA_VERSION 11
@@ -96,6 +97,7 @@ void game_loop() {
 
     init_variables();
 
+    init_op_system();
     initParticleSystem(&drag_particles, &drag_effect);
 
     drag_particles.cfg.startColorRed   = get_white_if_black(p1_color).r / 255.f;
@@ -124,7 +126,7 @@ void game_loop() {
         // Compare with true to store it in a single bit
         state.input.pressedJump = ((kDown & KEY_A) || (kDown & KEY_TOUCH)) == true;
         state.input.holdJump = (state.input.pressedJump || (kHeld & KEY_A) || (kHeld & KEY_TOUCH)) == true;
-        if (state.death_timer <= 0)  {
+        if (state.death_timer <= 0 && !(kHeld & KEY_Y))  {
             for (size_t i = 0; i < 4; i++) {
                 state.current_player = 0;
                 state.old_player = state.player;
@@ -159,13 +161,6 @@ void game_loop() {
                 toggle_playback_mp3();
             }
         }
-
-        drag_particles.emitterX = getLeft(&state.player);
-        drag_particles.emitterY = fabsf(gravBottom(&state.player));
-        drag_particles.emitting = state.player.time_since_ground < 0.05f;
-
-        drag_particles.gravityFlipped = state.player.upside_down;
-
 
         updateParticleSystem(&drag_particles, DT);
 

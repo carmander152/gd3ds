@@ -60,6 +60,12 @@ void cube_gamemode(Player *player) {
     } else {
         player->rotation += 415.3848f * STEPS_DT * mult * (player->mini ? 1.2f : 1.f);
     }
+
+    drag_particles.emitterX = getLeft(player) - 2;
+    drag_particles.emitterY = fabsf(gravBottom(player)) + (player->upside_down ? -4 : 4);
+    drag_particles.emitting = player->time_since_ground < 0.05f;
+
+    drag_particles.gravityFlipped = player->upside_down;
     
     
     if (player->on_ground) {
@@ -278,6 +284,8 @@ void run_player(Player *player) {
             player->time_since_ground = 0; 
         } 
     }
+
+    drag_particles.emitting = false;
 
     switch (player->gamemode) {
         case GAMEMODE_PLAYER:

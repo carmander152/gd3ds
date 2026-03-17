@@ -46,9 +46,14 @@ static void copy_particle(ParticleData* d, int dst, int src) {
 
     d->rotation[dst] = d->rotation[src];
     d->deltaRotation[dst] = d->deltaRotation[src];
+
+    d->angle[dst] = d->angle[src];
+    d->degreesPerSecond[dst] = d->degreesPerSecond[src];
+    d->radius[dst] = d->radius[src];
+    d->deltaRadius[dst] = d->deltaRadius[src];
 }
 
-void initParticle(ParticleSystem* ps, ParticleDefinition* cfg, int i) {
+void initParticle(ParticleSystem* ps, const ParticleDefinition* cfg, int i) {
     ParticleData* d = &ps->data;
 
     // Lifetime
@@ -68,8 +73,8 @@ void initParticle(ParticleSystem* ps, ParticleDefinition* cfg, int i) {
                  cfg->sourcePositionVariancey * rand_minus1_1();
 
     // Angle and speed
-    float angle = C3D_AngleFromDegrees(cfg->angle +
-                  cfg->angleVariance * rand_minus1_1());
+    float angle = C3D_AngleFromDegrees(normalize_angle(cfg->angle +
+                  cfg->angleVariance * rand_minus1_1()));
     
 
     float speed = cfg->speed +
@@ -165,8 +170,6 @@ void initParticle(ParticleSystem* ps, ParticleDefinition* cfg, int i) {
         float endRadius = cfg->minRadius;
 
         d->radius[i] = startRadius;
-
-        float life = d->totalTimeToLive[i];
 
         if (life > 0)
             d->deltaRadius[i] = (endRadius - startRadius) / life;
@@ -275,11 +278,11 @@ void updateParticleSystem(ParticleSystem* ps, float dt) {
 
         // convert polar -> cartesian
         for (int i = 0; i < count; i++) {
-            d->posx[i] = -cosf(d->angle[i]) * d->radius[i];
+            d->posx[i] = ps->emitterX + -cosf(d->angle[i]) * d->radius[i];
         }
 
         for (int i = 0; i < count; i++) {
-            d->posy[i] = -sinf(d->angle[i]) * d->radius[i];
+            d->posy[i] = ps->emitterY + -sinf(d->angle[i]) * d->radius[i];
         }
     }
 
@@ -352,7 +355,7 @@ void initParticleData(ParticleData* d, int capacity) {
     d->deltaRadius = alloc_array(capacity);
 }
 
-void initParticleSystem(ParticleSystem* ps, ParticleDefinition* cfg) {
+void initParticleSystem(ParticleSystem* ps, const ParticleDefinition* cfg) {
     // Allocate particles
     initParticleData(&ps->data, cfg->maxParticles);
 
@@ -418,7 +421,7 @@ void freeParticleData(ParticleData* d) {
     free(d->deltaRadius);
 }
 
-void drawParticleSystem(ParticleSystem* ps, bool isStationary) {
+void drawParticleSystem(ParticleSystem* ps, bool isStationary, float x_offset, float y_offset, float opacity) {
     ParticleData* d = &ps->data;
     int count = d->count;
 
@@ -432,7 +435,7 @@ void drawParticleSystem(ParticleSystem* ps, bool isStationary) {
         float b = d->colorB[i];
         float a = d->colorA[i];
 
-        u32 color = C2D_Color32f(r, g, b, a);
+        u32 color = C2D_Color32f(r, g, b, a * opacity);
 
         // If stationary, dont convert to screen space
         if (!isStationary) {
@@ -444,8 +447,8 @@ void drawParticleSystem(ParticleSystem* ps, bool isStationary) {
         float half = size * 0.5f;
 
         C2D_DrawRectSolid(
-            x - half,
-            y - half,
+            x - half + x_offset,
+            y - half + y_offset,
             0.0f,
             size,
             size,
