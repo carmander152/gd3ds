@@ -870,7 +870,7 @@ void create_objects() {
     u64 start = svcGetSystemTick();
     // Create sprites
     for (int x = -1; x <= width; x++) {
-        for (int y = 0; y < height; y++) {
+        for (int y = 0; y <= height; y++) {
             int sx = cam_sx + x;
             int sy = cam_sy + y;
             if (sx < 0) continue;
