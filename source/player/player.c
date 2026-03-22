@@ -217,6 +217,13 @@ void ball_gamemode(Player *player) {
         player->ball_rotation_speed = 2.3;
     }
 
+    
+    drag_particles.emitterX = player->x;
+    drag_particles.emitterY = fabsf(gravBottom(player)) + (player->upside_down ? -4 : 4);
+    drag_particles.emitting = player->on_ground || player->on_ceiling;
+
+    drag_particles.gravityFlipped = player->upside_down;
+
     // Jump
     if ((state.input.holdJump) && (player->on_ground || player->on_ceiling) && player->buffering_state == BUFFER_READY) {        
         float delta_y = player->vel_y;

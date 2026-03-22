@@ -863,17 +863,18 @@ void create_objects() {
     viewable_objects_ptr[sprite_count] = vo;
     sprite_count++;
 
-    int width = (SCREEN_WIDTH / 2) / SECTION_SIZE + 2;
-    int height = (SCREEN_HEIGHT / 2) / SECTION_SIZE + 2;
-    int cam_sx = (int)((state.camera_x + SCREEN_WIDTH / 2) / SECTION_SIZE);
-    int cam_sy = (int)((state.camera_y + SCREEN_HEIGHT / 2) / SECTION_SIZE);
+    int width = ceilf((SCREEN_WIDTH_AREA) / SECTION_SIZE);
+    int height = ceilf((SCREEN_HEIGHT_AREA) / SECTION_SIZE);
+    int cam_sx = (int)((state.camera_x) / SECTION_SIZE);
+    int cam_sy = (int)((state.camera_y - CAMERA_Y_OFFSET) / SECTION_SIZE);
     u64 start = svcGetSystemTick();
     // Create sprites
-    for (int x = -width; x <= width; x++) {
-        for (int y = -height; y <= height; y++) {
+    for (int x = -1; x <= width; x++) {
+        for (int y = 0; y < height; y++) {
             int sx = cam_sx + x;
             int sy = cam_sy + y;
             if (sx < 0) continue;
+            if (sy < 0) continue;
 
             Section *sec = get_or_create_section(sx, sy);
             for (int i = 0; i < sec->object_count; i++) {
