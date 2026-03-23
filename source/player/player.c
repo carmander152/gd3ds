@@ -15,11 +15,11 @@
 
 #include "utils/gfx.h"
 
-MotionTrail trail;
+MotionTrail *trail;
 MotionTrail trail_p1;
 MotionTrail trail_p2;
 
-MotionTrail wave_trail;
+MotionTrail *wave_trail;
 MotionTrail wave_trail_p1;
 MotionTrail wave_trail_p2;
 
@@ -59,8 +59,8 @@ void set_p_velocity(Player *player, float vel) {
 void cube_gamemode(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
     
-    trail.positionR = (Vec2){player->x, player->y};  
-    trail.startingPositionInitialized = true;
+    trail->positionR = (Vec2){player->x, player->y};  
+    trail->startingPositionInitialized = true;
 
     player->gravity = -2794.1082;
     
@@ -83,7 +83,7 @@ void cube_gamemode(Player *player) {
     
     
     if (player->on_ground) {
-        MotionTrail_StopStroke(&trail);
+        MotionTrail_StopStroke(trail);
         if (player->slope_data.slope_id < 0) player->rotation = roundf(player->rotation / 90.0f) * 90.0f;
     }
 
@@ -154,8 +154,8 @@ void ship_gamemode(Player *player) {
     float x = player->x + rot_x * scale;
     float y = player->y + rot_y * scale;
     
-    trail.positionR = (Vec2){x, y};  
-    trail.startingPositionInitialized = true;
+    trail->positionR = (Vec2){x, y};  
+    trail->startingPositionInitialized = true;
 
     if (state.dual) {
         // Make both dual players symetric
@@ -205,15 +205,15 @@ static float ballJumpHeights[SPEED_COUNT] = {
 };
 
 void ball_gamemode(Player *player) {
-    trail.positionR = (Vec2){player->x, player->y};  
-    trail.startingPositionInitialized = true;
+    trail->positionR = (Vec2){player->x, player->y};  
+    trail->startingPositionInitialized = true;
 
     int mult = (player->upside_down ? -1 : 1);
 
     player->gravity = -1676.46672f;  
     
     if (player->on_ground || player->on_ceiling) {
-        MotionTrail_StopStroke(&trail);
+        MotionTrail_StopStroke(trail);
         player->ball_rotation_speed = 2.3;
     }
 
@@ -272,8 +272,8 @@ void ufo_gamemode(Player *player) {
     float x = player->x + rot_x * scale;
     float y = player->y + rot_y * scale;
     
-    trail.positionR = (Vec2){x, y};  
-    trail.startingPositionInitialized = true;
+    trail->positionR = (Vec2){x, y};  
+    trail->startingPositionInitialized = true;
 
     int mult = (player->upside_down ? -1 : 1);
     bool buffering_check = ((state.old_player.gamemode == GAMEMODE_PLAYER || state.old_player.gamemode == GAMEMODE_SHIP || state.old_player.gamemode == GAMEMODE_DART) && (state.input.holdJump));
@@ -322,12 +322,12 @@ void ufo_gamemode(Player *player) {
 }
 
 void wave_gamemode(Player *player) {
-    trail.positionR = (Vec2){player->x, player->y};  
-    trail.startingPositionInitialized = true;
+    trail->positionR = (Vec2){player->x, player->y};  
+    trail->startingPositionInitialized = true;
     
-    wave_trail.positionR = (Vec2){player->x, player->y};  
-    wave_trail.startingPositionInitialized = true;
-    if (player->cutscene_timer == 0) wave_trail.opacity = 1.f;
+    wave_trail->positionR = (Vec2){player->x, player->y};  
+    wave_trail->startingPositionInitialized = true;
+    if (player->cutscene_timer == 0) wave_trail->opacity = 1.f;
 
     if (player->buffering_state == BUFFER_READY) player->buffering_state = BUFFER_END;
 
@@ -336,13 +336,13 @@ void wave_gamemode(Player *player) {
 
     player->vel_y = (input * 2 - 1) * player_speeds[state.speed] * (player->mini ? 2 : 1);
     if (player->vel_y != state.old_player.vel_y || player->on_ground != state.old_player.on_ground || player->on_ceiling != state.old_player.on_ceiling) {
-        MotionTrail_AddWavePoint(&wave_trail);
+        MotionTrail_AddWavePoint(wave_trail);
     }
 }
 
 void run_player(Player *player) {
     float scale = (player->mini) ? 0.6f : 1.f;
-    trail.stroke = 10.f * scale;
+    trail->stroke = 10.f * scale;
     
     if (!player->left_ground) {
         // Ground
@@ -377,18 +377,18 @@ void run_player(Player *player) {
             cube_gamemode(player);
             break;
         case GAMEMODE_SHIP:
-            MotionTrail_ResumeStroke(&trail);
+            MotionTrail_ResumeStroke(trail);
             ship_gamemode(player);
             break;
         case GAMEMODE_PLAYER_BALL:
             ball_gamemode(player);
             break;
         case GAMEMODE_BIRD:
-            MotionTrail_ResumeStroke(&trail);
+            MotionTrail_ResumeStroke(trail);
             ufo_gamemode(player);
             break;
         case GAMEMODE_DART:
-            MotionTrail_ResumeStroke(&trail);
+            MotionTrail_ResumeStroke(trail);
             wave_gamemode(player);
             break;
     }
@@ -396,11 +396,11 @@ void run_player(Player *player) {
     player->time_since_ground += STEPS_DT;
 
     if (player->gamemode != GAMEMODE_DART || player->cutscene_timer > 0) {
-        if (wave_trail.opacity > 0) wave_trail.opacity -= 0.02f;
+        if (wave_trail->opacity > 0) wave_trail->opacity -= 0.02f;
         
-        if (wave_trail.opacity <= 0) {
-            wave_trail.opacity = 0;
-            wave_trail.nuPoints = 0;
+        if (wave_trail->opacity <= 0) {
+            wave_trail->opacity = 0;
+            wave_trail->nuPoints = 0;
         }
     }
 
@@ -484,7 +484,12 @@ void run_player(Player *player) {
     player->snap_rotation = false;
 }
 
+float collision_time = 0;
+float player_time = 0;
+float handle_player_time = 0;
+
 void handle_player(Player *player) {
+    u64 start_player = svcGetSystemTick();
     if (state.input.holdJump) {
         if (player->buffering_state == BUFFER_NONE) {
             player->buffering_state = BUFFER_READY;
@@ -502,18 +507,30 @@ void handle_player(Player *player) {
 
     player->frame++;
 
+    u64 start = svcGetSystemTick();
     collide_with_objects(player);
+    u64 end = svcGetSystemTick();
+    u64 ticks = end - start;
+    collision_time += ticks / CPU_TICKS_PER_MSEC;
     
     if (state.noclip) state.dead = false;
     
     if (state.dead) return;
 
+    start = svcGetSystemTick();
     run_player(player);
+    end = svcGetSystemTick();
+    ticks = end - start;
+    player_time += ticks / CPU_TICKS_PER_MSEC;
     
     if (state.noclip) state.dead = false;
     
     player->delta_y = player->y - state.old_player.y;
 
+    
+    u64 end_player = svcGetSystemTick();
+    ticks = end_player - start_player;
+    handle_player_time += ticks / CPU_TICKS_PER_MSEC;
 }
 
 
@@ -606,14 +623,14 @@ void draw_p1_trail(Player *player) {
 }
 
 void draw_player(Player *player) {
-    MotionTrail_Update(&trail, delta);
-    MotionTrail_UpdateWaveTrail(&wave_trail, delta);
+    MotionTrail_Update(trail, delta);
+    MotionTrail_UpdateWaveTrail(wave_trail, delta);
     update_p1_trail(player);
 
     change_blending(true);
     draw_p1_trail(player);
-    MotionTrail_Draw(&trail);
-    MotionTrail_DrawWaveTrail(&wave_trail);
+    MotionTrail_Draw(trail);
+    MotionTrail_DrawWaveTrail(wave_trail);
 
     change_blending(false);
 

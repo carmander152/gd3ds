@@ -33,7 +33,6 @@ typedef struct {
     float height;
 } InternalHitbox;
 
-
 typedef struct {
     int gamemode;
     float x;
@@ -130,11 +129,15 @@ enum PlayerSpeeds {
     SPEED_COUNT
 };
 
-extern MotionTrail trail;
+extern float collision_time;
+extern float player_time;
+extern float handle_player_time;
+
+extern MotionTrail *trail;
 extern MotionTrail trail_p1;
 extern MotionTrail trail_p2;
 
-extern MotionTrail wave_trail;
+extern MotionTrail *wave_trail;
 extern MotionTrail wave_trail_p1;
 extern MotionTrail wave_trail_p2;
 

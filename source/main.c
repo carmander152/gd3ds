@@ -193,6 +193,12 @@ void game_loop() {
         state.input.holdJump = (state.input.pressedJump || (kHeld & KEY_A) || (kHeld & KEY_TOUCH)) == true;
         if (state.death_timer <= 0 && !(kHeld & KEY_Y))  {
             physics_calc_time = 0;
+            number_of_collisions = 0;
+            number_of_collisions_checks = 0;
+            collision_time = 0;
+            player_time = 0;
+            handle_player_time = 0;
+            
             u64 now = svcGetSystemTick();
             delta = (now - lastTime) / (CPU_TICKS_PER_MSEC * 1000);
             lastTime = now;
@@ -204,19 +210,16 @@ void game_loop() {
 
             accumulator += delta;
 
-            
             // Run simulation in fixed steps
             while (accumulator >= STEPS_DT_UNMOD) {
                 u64 start_physics = svcGetSystemTick();
                 state.current_player = 0;
                 state.old_player = state.player;
                 
-                trail = trail_p1;
-                wave_trail = wave_trail_p1;
+                trail = &trail_p1;
+                wave_trail = &wave_trail_p1;
                 handle_player(&state.player);
                 handle_mirror_transition();
-                trail_p1 = trail;
-                wave_trail_p1 = wave_trail;
 
                 if (state.dead) break;
 
@@ -224,11 +227,9 @@ void game_loop() {
                     // Run second player
                     state.old_player = state.player2;
                     state.current_player = 1;
-                    trail = trail_p2;
-                    wave_trail = wave_trail_p2;
+                    trail = &trail_p2;
+                    wave_trail = &wave_trail_p2;
                     handle_player(&state.player2);
-                    trail_p2 = trail;
-                    wave_trail_p2 = wave_trail;
 
                     if (state.dead) break;
                 }
@@ -239,13 +240,13 @@ void game_loop() {
                 float physics_time = (end_physics - start_physics) / (CPU_TICKS_PER_MSEC);
 
                 if (physics_time / 1000 >= STEPS_DT_UNMOD) {
-                    frame_skipped = (int) (physics_time / 1000 * STEPS_HZ);
+                    frame_skipped = (int) ((physics_time / 1000) * STEPS_HZ);
                 }
                 else frame_skipped = 0;
 
                 physics_calc_time += physics_time;
 
-                accumulator -= STEPS_DT_UNMOD;
+                accumulator -= STEPS_DT;
                 steps++;
                 level_frame++;
             }
@@ -278,7 +279,6 @@ void game_loop() {
         u64 ticks_trig = end_trig - start_trig;
         triggers_time = ticks_trig / CPU_TICKS_PER_MSEC;
 
-
         u64 start_obj = svcGetSystemTick();
         create_objects();
         u64 end_obj = svcGetSystemTick();
@@ -286,7 +286,7 @@ void game_loop() {
         sprite_drawing_time = ticks_obj / CPU_TICKS_PER_MSEC;
 
         u64 start_part = svcGetSystemTick();
-        updateParticleSystem(&drag_particles, DT);
+        updateParticleSystem(&drag_particles, delta);
         update_object_particles();
         u64 end_part = svcGetSystemTick();
         u64 ticks_part = end_part - start_part;
@@ -326,19 +326,25 @@ void game_loop() {
 
             float processingTime = ((ticks / CPU_TICKS_PER_MSEC)) * 6;
             float drawingTime = C3D_GetDrawingTime() * 6;
-            
-            draw_text(bigFont_fontCharset, bigFont_sheet, 0, 6, 0.5f, 0, "CPU: %6.2f%% (%6.2f%% %6.2f%%)", (C3D_GetProcessingTime() * 6) + processingTime, C3D_GetProcessingTime() * 6, processingTime);
-            draw_text(bigFont_fontCharset, bigFont_sheet, 0, 18, 0.5f, 0, "GPU: %6.2f%%", drawingTime);
 
-            draw_text(bigFont_fontCharset, bigFont_sheet, 320-8, 42, 0.5f, 1.0, "%d steps", steps);
-            draw_text(bigFont_fontCharset, bigFont_sheet, 320-32, 54, 0.5f, 1.0, "%.2f%% Physics", physics_calc_time * 6);
-            draw_text(bigFont_fontCharset, bigFont_sheet, 320-32, 66, 0.5f, 1.0, "%.2f%% Particle", particle_calc_time * 6);
-            draw_text(bigFont_fontCharset, bigFont_sheet, 320-32, 78, 0.5f, 1.0, "%.2f%% Triggers", triggers_time * 6);
-            draw_text(bigFont_fontCharset, bigFont_sheet, 320-32, 90, 0.5f, 1.0, "%d/%d Collision", number_of_collisions, number_of_collisions_checks);
-            draw_text(bigFont_fontCharset, bigFont_sheet, 0, 42, 0.5f, 0, "SprDraw:  %6.2f%%", (sprite_drawing_time) * 6);
-            draw_text(bigFont_fontCharset, bigFont_sheet, 0, 54, 0.5f, 0, " - Creating: %6.2f%%", (object_creating_time) * 6);
-            draw_text(bigFont_fontCharset, bigFont_sheet, 0, 66, 0.5f, 0, " - Sorting:  %6.2f%%", (object_sorting_time) * 6);
-            draw_text(bigFont_fontCharset, bigFont_sheet, 0, 90, 0.5f, 0, "Drawing:  %6.2f%%", (object_drawing_time) * 6);
+            #define DEBUG_TEXT_SCALE 0.4f
+            
+            draw_text(bigFont_fontCharset, bigFont_sheet, 0, 6,  DEBUG_TEXT_SCALE, 0, "CPU: %6.2f%% (%6.2f%% %6.2f%%)", (C3D_GetProcessingTime() * 6) + processingTime, C3D_GetProcessingTime() * 6, processingTime);
+            draw_text(bigFont_fontCharset, bigFont_sheet, 0, 18, DEBUG_TEXT_SCALE, 0, "GPU: %6.2f%%", drawingTime);
+
+            draw_text(bigFont_fontCharset, bigFont_sheet, 180, 42,  DEBUG_TEXT_SCALE, 0, "%d steps", steps);
+            draw_text(bigFont_fontCharset, bigFont_sheet, 180, 54,  DEBUG_TEXT_SCALE, 0, "Particle: %6.2f%%", particle_calc_time * 6);
+            draw_text(bigFont_fontCharset, bigFont_sheet, 180, 66,  DEBUG_TEXT_SCALE, 0, "Triggers: %6.2f%%", triggers_time * 6);
+            draw_text(bigFont_fontCharset, bigFont_sheet, 180, 78,  DEBUG_TEXT_SCALE, 0, "Collision %d/%d", number_of_collisions, number_of_collisions_checks);
+            draw_text(bigFont_fontCharset, bigFont_sheet, 180, 90,  DEBUG_TEXT_SCALE, 0, "Physics: %6.2f%%", physics_calc_time * 6);
+            draw_text(bigFont_fontCharset, bigFont_sheet, 180, 102, DEBUG_TEXT_SCALE, 0, " - Coll: %6.2f%%", collision_time * 6);
+            draw_text(bigFont_fontCharset, bigFont_sheet, 180, 114, DEBUG_TEXT_SCALE, 0, " - Play: %6.2f%%", player_time * 6);
+            draw_text(bigFont_fontCharset, bigFont_sheet, 180, 126, DEBUG_TEXT_SCALE, 0, " - Hndl: %6.2f%%", handle_player_time * 6);
+
+            draw_text(bigFont_fontCharset, bigFont_sheet, 0,   42,  DEBUG_TEXT_SCALE, 0, "SprDraw:  %6.2f%%", (sprite_drawing_time) * 6);
+            draw_text(bigFont_fontCharset, bigFont_sheet, 0,   54,  DEBUG_TEXT_SCALE, 0, " - Creating: %6.2f%%", (object_creating_time) * 6);
+            draw_text(bigFont_fontCharset, bigFont_sheet, 0,   66,  DEBUG_TEXT_SCALE, 0, " - Sorting:  %6.2f%%", (object_sorting_time) * 6);
+            draw_text(bigFont_fontCharset, bigFont_sheet, 0,   90,  DEBUG_TEXT_SCALE, 0, "Drawing:  %6.2f%%", (object_drawing_time) * 6);
 
             if (state.noclip) {
                 draw_text(bigFont_fontCharset, bigFont_sheet, 0, 234, 0.5f, 0, "Noclip Activated");

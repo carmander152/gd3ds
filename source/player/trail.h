@@ -52,15 +52,6 @@ typedef struct {
 
 } MotionTrail;
 
-extern MotionTrail trail;
-extern MotionTrail trail_p1;
-extern MotionTrail trail_p2;
-
-extern MotionTrail wave_trail;
-extern MotionTrail wave_trail_p1;
-extern MotionTrail wave_trail_p2;
-
-
 void MotionTrail_Init(MotionTrail* trail, float fade, float minSeg, float stroke, bool waveTrail, Color color, C2D_Image tex);
 void MotionTrail_UpdateWaveTrail(MotionTrail *trail, float delta);
 void MotionTrail_Update(MotionTrail* trail, float delta);

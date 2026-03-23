@@ -282,20 +282,20 @@ void handle_triggers() {
                 
                 if (!GET_ACTIVATED(obj)) {
                     if (objects.touch_triggered[obj]) {
-                    // Try p1
-                    if (intersect(
-                        state.player.x, state.player.y, state.player.width, state.player.height, 0, 
-                        objects.x[obj], objects.y[obj], 30, 30, objects.rotation[obj]
-                    )) {
-                        run_trigger(obj);
-                    } else
-                    // Try now p2
-                    if (intersect(
-                        state.player2.x, state.player2.y, state.player2.width, state.player2.height, 0, 
-                        objects.x[obj], objects.y[obj], 30, 30, objects.rotation[obj]
-                    )) {
-                        run_trigger(obj);
-                    }
+                        // Try p1
+                        if (intersect(
+                            state.player.x, state.player.y, state.player.width, state.player.height, 0, 
+                            objects.x[obj], objects.y[obj], 30, 30, objects.rotation[obj]
+                        )) {
+                            run_trigger(obj);
+                        } else
+                        // Try now p2
+                        if (intersect(
+                            state.player2.x, state.player2.y, state.player2.width, state.player2.height, 0, 
+                            objects.x[obj], objects.y[obj], 30, 30, objects.rotation[obj]
+                        )) {
+                            run_trigger(obj);
+                        }
                     } else if (objects.x[obj] < state.player.x) {
                         run_trigger(obj);
                     }

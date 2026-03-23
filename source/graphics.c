@@ -1015,21 +1015,16 @@ void draw_objects() {
             blend_enabled = false;
             state.current_player = 0;
             
-            trail = trail_p1;
-            wave_trail = wave_trail_p1;
+            trail = &trail_p1;
+            wave_trail = &wave_trail_p1;
 
             draw_player(&state.player);
 
-            trail_p1 = trail;
-            wave_trail_p1 = wave_trail;
-
             if (state.dual) {
                 state.current_player = 1;
-                trail = trail_p2;
-                wave_trail = wave_trail_p2;
+                trail = &trail_p2;
+                wave_trail = &wave_trail_p2;
                 draw_player(&state.player2);
-                trail_p2 = trail;
-                wave_trail_p2 = wave_trail;
             }          
         }
     }
