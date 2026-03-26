@@ -3,7 +3,7 @@
 #include "level_loading.h"
 #include "color_channels.h"
 
-#define FADING_OBJ_PADDING 90
+#define FADING_OBJ_PADDING 45
 #define FADING_OBJ_WIDTH 180
 
 #define FADE_WIDTH 75
