@@ -280,10 +280,10 @@ void game_loop() {
                 }
             }
         }
-        
-        frame_counter++;
 
         if (!game_paused) {
+            frame_counter++;
+            
             if (state.dead && state.death_timer <= 0.f) {
                 state.death_timer = 1.f;
                 handle_death();
@@ -322,6 +322,17 @@ void game_loop() {
             u64 end_part = svcGetSystemTick();
             u64 ticks_part = end_part - start_part;
             particle_calc_time = ticks_part / CPU_TICKS_PER_MSEC;
+
+            // Update trails
+            MotionTrail_Update(&trail_p1, delta);
+            MotionTrail_UpdateWaveTrail(&wave_trail_p1, delta);
+            update_p1_trail(&state.player);
+
+            if (state.dual) {
+                MotionTrail_Update(&trail_p2, delta);
+                MotionTrail_UpdateWaveTrail(&wave_trail_p2, delta);
+                update_p1_trail(&state.player2);
+            }
         }
         
 

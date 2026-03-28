@@ -1165,7 +1165,7 @@ void load_level_info(char *data, char *level_string) {
     if (upsidedown_data) {
         level_info.level_name = level_name_data;
     } else {
-        level_info.level_name = default_name;
+        level_info.level_name = (char *) default_name;
     }
 }
 

@@ -654,10 +654,6 @@ void draw_p1_trail(Player *player) {
 }
 
 void draw_player(Player *player) {
-    MotionTrail_Update(trail, delta);
-    MotionTrail_UpdateWaveTrail(wave_trail, delta);
-    update_p1_trail(player);
-
     change_blending(true);
     draw_p1_trail(player);
     MotionTrail_Draw(trail);

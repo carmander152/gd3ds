@@ -191,3 +191,5 @@ void draw_hitbox(int obj);
 void draw_player_hitbox(Player *player);
 void draw_hitbox_trail(int player);
 void add_new_hitbox(Player *player);
+
+void update_p1_trail(Player *player);
