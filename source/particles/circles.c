@@ -107,7 +107,7 @@ void draw_use_effects() {
 
             // If stationary, dont convert to screen space
             
-            x = ((x - state.camera_x));
+            x = get_mirror_x((x - state.camera_x), state.mirror_factor);
             y = GSP_SCREEN_WIDTH - ((y - state.camera_y));  
 
             if (effect->def.hollow) {
