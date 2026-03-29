@@ -73,5 +73,6 @@ typedef struct {
 void updateParticleSystem(ParticleSystem* ps, float dt);
 void initParticleData(ParticleData* d, int capacity);
 void initParticleSystem(ParticleSystem* ps, const ParticleDefinition* cfg);
+void spawnMultipleParticles(ParticleSystem* ps, int emitCount);
 void drawParticleSystem(ParticleSystem* ps, float x_offset, float y_offset, float opacity);
 void freeParticleData(ParticleData* d);

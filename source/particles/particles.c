@@ -193,6 +193,20 @@ void initParticle(ParticleSystem* ps, const ParticleDefinition* cfg, int i) {
     }
 }
 
+void spawnMultipleParticles(ParticleSystem* ps, int emitCount) {
+    if (particlesDisabled) return;
+    
+    if (!ps->active)
+        return;
+
+    ParticleData* d = &ps->data;
+    
+    for (int i = 0; i < emitCount && d->count < d->capacity; i++) {
+        int idx = d->count++;
+        initParticle(ps, &ps->cfg, idx);
+    }
+}
+
 void updateParticleSystem(ParticleSystem* ps, float dt) {
     if (particlesDisabled) return;
     

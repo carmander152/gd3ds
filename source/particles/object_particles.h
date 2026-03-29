@@ -11,6 +11,7 @@ typedef struct {
 } ObjectParticles;
 
 extern ObjectParticles object_particle[MAX_OBJECT_PS];
+extern ParticleSystem brick_destroy_particles;
 
 void init_op_system();
 bool is_ps_already_loaded(int id);

@@ -10,6 +10,7 @@
 #include "math_helpers.h"
 #include "slope.h"
 #include "main.h"
+#include "particles/object_particles.h"
 
 const float jump_heights_table[SPEED_COUNT][JUMP_TYPES_COUNT][GAMEMODE_COUNT][2] = {
     { // SLOW               CUBE                   SHIP                  BALL                    UFO                 WAVE   },
@@ -802,6 +803,9 @@ void handle_collision(Player *player, int obj, const ObjectHitbox *hitbox) {
             )) {
                 if (objects.id[obj] == BREAKABLE_BLOCK) {
                     // Spawn breakable brick particles
+                    brick_destroy_particles.emitterX = objects.x[obj];
+                    brick_destroy_particles.emitterY = objects.y[obj];
+                    spawnMultipleParticles(&brick_destroy_particles, 25);
                     objects.id[obj] = 0;
                 } else {
                     // Not a brick, die

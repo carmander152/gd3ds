@@ -6,6 +6,8 @@
 
 ObjectParticles object_particle[MAX_OBJECT_PS];
 
+ParticleSystem brick_destroy_particles;
+
 void init_op_system() {
     for (size_t i = 0; i < MAX_OBJECT_PS; i++) {
         object_particle[i].id = -1;

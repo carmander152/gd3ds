@@ -189,6 +189,8 @@ void game_loop() {
 
     initParticleSystem(&burst_particles[0], &burst_effect);
     initParticleSystem(&burst_particles[1], &burst_effect);
+
+    initParticleSystem(&brick_destroy_particles, &glass_destroy_01);
     
     Color p1_not_white = get_white_if_black(p1_color);
     Color p2_not_white = get_white_if_black(p2_color);
@@ -296,6 +298,8 @@ void game_loop() {
                 burst_particles[i].emitting = false;
             }
             
+            brick_destroy_particles.emitting = false;
+            
             u64 now = svcGetSystemTick();
             delta = (now - lastTime) / (CPU_TICKS_PER_MSEC * 1000);
             lastTime = now;
@@ -395,6 +399,7 @@ void game_loop() {
                 updateParticleSystem(&secondary_particles[i], delta);
                 updateParticleSystem(&burst_particles[i], delta);
             }
+            updateParticleSystem(&brick_destroy_particles, delta);
             update_object_particles();
             u64 end_part = svcGetSystemTick();
             u64 ticks_part = end_part - start_part;
@@ -500,19 +505,16 @@ void game_loop() {
         }
     }
 
-    freeParticleData(&drag_particles[0].data);
-    freeParticleData(&drag_particles_2[0].data);
-    freeParticleData(&ship_fire_particles[0].data);
-    freeParticleData(&secondary_particles[0].data);
-    freeParticleData(&ship_secondary_particles[0].data);
-    freeParticleData(&burst_particles[0].data);
+    for (int i = 0; i < 2; i++) {
+        freeParticleData(&drag_particles[i].data);
+        freeParticleData(&drag_particles_2[i].data);
+        freeParticleData(&ship_fire_particles[i].data);
+        freeParticleData(&secondary_particles[i].data);
+        freeParticleData(&ship_secondary_particles[i].data);
+        freeParticleData(&burst_particles[i].data);
+    }
 
-    freeParticleData(&drag_particles[1].data);
-    freeParticleData(&drag_particles_2[1].data);
-    freeParticleData(&ship_fire_particles[1].data);
-    freeParticleData(&ship_secondary_particles[1].data);
-    freeParticleData(&secondary_particles[1].data);
-    freeParticleData(&burst_particles[1].data);
+    freeParticleData(&brick_destroy_particles.data);
     unload_level();
 
     game_state = STATE_LEVEL_SELECT;
