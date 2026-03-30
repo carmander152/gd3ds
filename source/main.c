@@ -252,6 +252,11 @@ void game_loop() {
     glitter_particles.cfg.startColorRed   = p1_not_white.r / 255.f;
     glitter_particles.cfg.startColorGreen = p1_not_white.g / 255.f;
     glitter_particles.cfg.startColorBlue  = p1_not_white.b / 255.f;
+    glitter_particles.cfg.startColorAlpha = 1.f;
+    
+    glitter_particles.cfg.finishColorRed   = p1_not_white.r / 255.f;
+    glitter_particles.cfg.finishColorGreen = p1_not_white.g / 255.f;
+    glitter_particles.cfg.finishColorBlue  = p1_not_white.b / 255.f;
 
     exiting_level = false;
 
