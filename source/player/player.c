@@ -153,6 +153,7 @@ void rotate_fly(Player *player, float mult) {
         player->lerp_rotation = player->rotation;
     } else if (STEPS_DT * 72 <= diff_x * diff_x + diff_y * diff_y) {
 		player->rotation = RadToDeg(slerp_fancy(DegToRad(player->rotation), angle_rad, (STEPS_DT * 60) * mult));
+        player->lerp_rotation = player->rotation;
 	}
 }
 
