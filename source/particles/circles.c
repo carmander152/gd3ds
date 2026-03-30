@@ -13,7 +13,11 @@ const UseEffectDefinition pad_use_effect = {
     .start_rad = 0,
     .end_rad = 38,
     .hollow = false,
-    .trifading = false
+    .trifading = false,
+    .start_opacity_ease = EASE_LINEAR,
+    .end_opacity_ease = EASE_LINEAR,
+    .start_rad_ease = EASE_OUT,
+    .end_rad_ease = EASE_OUT,
 };
 
 const UseEffectDefinition orb_use_effect = {
@@ -26,7 +30,11 @@ const UseEffectDefinition orb_use_effect = {
     .start_rad = 35,
     .end_rad = 0,
     .hollow = false,
-    .trifading = true
+    .trifading = true,
+    .start_opacity_ease = EASE_LINEAR,
+    .end_opacity_ease = EASE_LINEAR,
+    .start_rad_ease = EASE_LINEAR,
+    .end_rad_ease = EASE_LINEAR,
 };
 
 const UseEffectDefinition portal_use_effect = {
@@ -39,7 +47,11 @@ const UseEffectDefinition portal_use_effect = {
     .start_rad = 40,
     .end_rad = 0,
     .hollow = false,
-    .trifading = true
+    .trifading = true,
+    .start_opacity_ease = EASE_LINEAR,
+    .end_opacity_ease = EASE_LINEAR,
+    .start_rad_ease = EASE_LINEAR,
+    .end_rad_ease = EASE_LINEAR,
 };
 
 UseEffect use_effects[MAX_USE_EFFECTS];
@@ -56,6 +68,9 @@ UseEffect *add_use_effect(float x, float y, const UseEffectDefinition *def) {
             // Struct copy
             effect->def = *def;
 
+            effect->mid_rad = (effect->def.end_rad + effect->def.start_rad) / 2;
+            effect->mid_opacity = (effect->def.end_opacity + effect->def.start_opacity) / 2;
+
             effect->elapsed = 0;
             return effect;
         }
@@ -67,20 +82,45 @@ void update_use_effects(float delta) {
     for (size_t i = 0; i < MAX_USE_EFFECTS; i++) {
         UseEffect *effect = &use_effects[i];
         if (effect->active) {
+            float progress = (effect->elapsed / effect->def.duration);
+            float duration_halved = effect->def.duration / 2;
+
             float opacity;
             if (effect->def.trifading) {
-                if ((effect->elapsed / effect->def.duration) < 0.5f) {
-                    opacity = easeValue(EASE_LINEAR, effect->def.start_opacity, effect->def.end_opacity, effect->elapsed, effect->def.duration / 2, 2.f);
+                if (progress < 0.5f) {
+                    opacity = easeValue(effect->def.start_opacity_ease, effect->def.start_opacity, effect->def.end_opacity, effect->elapsed, duration_halved, 2.f);
                 } else {
-                    opacity = easeValue(EASE_LINEAR, effect->def.end_opacity, effect->def.start_opacity, effect->elapsed - (effect->def.duration / 2), effect->def.duration / 2, 2.f);
+                    opacity = easeValue(effect->def.end_opacity_ease, effect->def.end_opacity, effect->def.start_opacity, effect->elapsed - duration_halved, duration_halved, 2.f);
                 }
             } else {
-                opacity = easeValue(EASE_LINEAR, effect->def.start_opacity, effect->def.end_opacity, effect->elapsed, effect->def.duration, 2.f);
+                // Merge both easings if both are the same
+                if (effect->def.start_opacity_ease == effect->def.end_opacity_ease) {
+                    opacity = easeValue(effect->def.start_opacity_ease, effect->def.start_opacity, effect->def.end_opacity, effect->elapsed, effect->def.duration, 2.f);
+                } else {
+                    if (progress < 0.5f) {
+                        opacity = easeValue(effect->def.start_opacity_ease, effect->def.start_opacity, effect->mid_opacity, effect->elapsed, duration_halved, 2.f);
+                    } else {
+                        opacity = easeValue(effect->def.end_opacity_ease, effect->mid_opacity, effect->def.end_opacity, effect->elapsed - duration_halved, duration_halved, 2.f);
+                    }
+                }
             }
 
             effect->opacity = get_opacity(opacity);
 
-            effect->rad = easeValue(EASE_OUT, effect->def.start_rad, effect->def.end_rad, effect->elapsed, effect->def.duration, 2.f);
+            float rad;
+
+            // Merge both easings if both are the same
+            if (effect->def.start_rad_ease == effect->def.end_rad_ease) {
+                rad = easeValue(effect->def.start_rad_ease, effect->def.start_rad, effect->def.end_rad, effect->elapsed, effect->def.duration, 2.f);
+            } else {
+                if (progress < 0.5f) {
+                    rad = easeValue(effect->def.start_rad_ease, effect->def.start_rad, effect->mid_rad, effect->elapsed, duration_halved, 2.f);
+                } else {
+                    rad = easeValue(effect->def.end_rad_ease, effect->mid_rad, effect->def.end_rad, effect->elapsed - duration_halved, duration_halved, 2.f);
+                }
+            }
+
+            effect->rad = rad;
 
             effect->elapsed += delta;
             if (effect->elapsed >= effect->def.duration) {

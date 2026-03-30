@@ -275,13 +275,13 @@ void handle_special_hitbox(Player *player, int obj, const ObjectHitbox *hitbox) 
                 player->left_ground = true;
 
                 player->gravObj_id = obj;
+                update_rotation_direction(player);
 
                 player->vel_y = jump_heights_table[state.speed][JUMP_BLUE_PAD][player->gamemode][player->mini];
                 player->upside_down ^= 1;
                 flip_other_player(state.current_player);
                 player->on_ground = false;
                 player->inverse_rotation = false;
-                update_rotation_direction(player);
 
                 UseEffect *effect = add_use_effect(objects.x[obj], objects.y[obj], &pad_use_effect);
                 if (effect) {
@@ -341,6 +341,7 @@ void handle_special_hitbox(Player *player, int obj, const ObjectHitbox *hitbox) 
                 MotionTrail_ResumeStroke(trail);
                 if (player->gamemode == GAMEMODE_DART) MotionTrail_AddWavePoint(wave_trail);
                 player->gravObj_id = obj;
+                update_rotation_direction(player);
                 
                 player->vel_y = jump_heights_table[state.speed][JUMP_BLUE_ORB][player->gamemode][player->mini];
                 player->upside_down ^= 1;
@@ -355,7 +356,6 @@ void handle_special_hitbox(Player *player, int obj, const ObjectHitbox *hitbox) 
                 player->left_ground = true;
                 player->buffering_state = BUFFER_END;
                 player->ufo_last_y = player->y;
-                update_rotation_direction(player);
                 
                 UseEffect *effect = add_use_effect(objects.x[obj], objects.y[obj], &orb_use_effect);
                 if (effect) {
@@ -510,13 +510,6 @@ void handle_special_hitbox(Player *player, int obj, const ObjectHitbox *hitbox) 
                     set_gamemode(player, GAMEMODE_PLAYER);
                     flip_other_player(state.current_player ^ 1);
                     update_rotation_direction(player);
-
-                    UseEffect *effect = add_use_effect(objects.x[obj], objects.y[obj], &portal_use_effect);
-                    if (effect) {
-                        effect->def.colorR = 0 / 255.f;
-                        effect->def.colorG = 255 / 255.f;
-                        effect->def.colorB = 50 / 255.f;
-                    }
                 }
                 if (state.dual) {
                     set_dual_bounds();

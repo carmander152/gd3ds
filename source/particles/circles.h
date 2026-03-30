@@ -1,5 +1,6 @@
 #pragma once
 #include <3ds.h>
+#include "easing.h"
 
 #define MAX_USE_EFFECTS 32
 
@@ -18,6 +19,11 @@ typedef struct {
 
     bool trifading;
     bool hollow;
+
+    EaseTypes start_rad_ease;
+    EaseTypes end_rad_ease;
+    EaseTypes start_opacity_ease;
+    EaseTypes end_opacity_ease;
 } UseEffectDefinition;
 
 typedef struct {
@@ -28,6 +34,9 @@ typedef struct {
     float opacity;
 
     float rad;
+
+    float mid_rad;
+    float mid_opacity;
     
     UseEffectDefinition def;
 
