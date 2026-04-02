@@ -142,6 +142,7 @@ void spawn_object_particles(int obj) {
 
                     object_particle[index].ps.emitterX = objects.x[obj];
                     object_particle[index].ps.emitterY = objects.y[obj];
+                    object_particle[index].ps.posVarRotates = true;
                 }
             }
             break;
@@ -155,6 +156,7 @@ void spawn_object_particles(int obj) {
 
                     object_particle[index].ps.emitterX = objects.x[obj];
                     object_particle[index].ps.emitterY = objects.y[obj];
+                    object_particle[index].ps.posVarRotates = true;
                 }
             }
             break;
@@ -168,6 +170,7 @@ void spawn_object_particles(int obj) {
 
                     object_particle[index].ps.emitterX = objects.x[obj];
                     object_particle[index].ps.emitterY = objects.y[obj];
+                    object_particle[index].ps.posVarRotates = true;
                 }
             }
             break;
