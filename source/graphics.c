@@ -437,7 +437,7 @@ void spawn_object_at(
     // Skip if no glow frame
     if (glowEnabled && obj->glow_frame >= 0) {
         if (sprite_count >= MAX_SPRITES - 1) return;
-        
+
         SpriteObject *vo = &viewable_objects[sprite_count];
 
         vo->spr = sprite_templates[id].glow_template;
@@ -1083,9 +1083,12 @@ void draw_objects() {
                 drawParticleSystem(&drag_particles_2[i], 0, 0, 1.f);
             }
             change_blending(false);
-
         }
     }
+
+    if (!blend_enabled) change_blending(true);
+    drawParticleSystem(&slow_speed_particles, 0, 0, 1.f);
+    change_blending(false);
 
     if (state.hitbox_display) {
         for (size_t s = 0; s < sprite_count; s++) {

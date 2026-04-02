@@ -482,13 +482,18 @@ void handle_special_hitbox(Player *player, int obj, const ObjectHitbox *hitbox) 
 
         case SLOW_SPEED_PORTAL:
             if (!GET_ACTIVATED(obj)) {
-                state.speed = SPEED_SLOW;
                 UseEffect *effect = add_use_effect(objects.x[obj], objects.y[obj], obj, &speed_collide_effect, GFX_TOP);
                 if (effect) {
                     effect->def.colorR = 255 / 255.f;
                     effect->def.colorG = 255 / 255.f;
                     effect->def.colorB = 0 / 255.f;
                 }
+
+                if (state.speed != SPEED_SLOW) {
+                    state.speed = SPEED_SLOW;
+                    slow_speed_particles_timer = 0.1f;
+                }
+
                 SET_ACTIVATED(obj, true);
             }
             break;

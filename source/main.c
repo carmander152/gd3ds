@@ -57,6 +57,8 @@ SFX explode_sound;
 ParticleSystem touch_drag_particles;
 ParticleSystem touch_explosion_particles;
 
+float slow_speed_particles_timer = 0.f;
+
 bool is_citra() {
     s64 version = 0;
     svcGetSystemInfo(&version, CITRA_TYPE, CITRA_VERSION);
@@ -228,7 +230,10 @@ void game_loop() {
 
     initParticleSystem(&brick_destroy_particles, &glass_destroy_01);
     initParticleSystem(&glitter_particles, &glitter_effect);
-    
+    initParticleSystem(&slow_speed_particles, &speed_effect_slow);
+
+    slow_speed_particles.stationary = true;
+
     Color p1_not_white = get_white_if_black(p1_color);
     Color p2_not_white = get_white_if_black(p2_color);
 
@@ -498,6 +503,18 @@ void game_loop() {
             }
             updateParticleSystem(&brick_destroy_particles, delta);
             updateParticleSystem(&glitter_particles, delta);
+            updateParticleSystem(&slow_speed_particles, delta);
+
+            float calc_x_speed_particles = SCREEN_WIDTH_AREA;
+            float calc_y_speed_particles = (SCREEN_HEIGHT_AREA / 2);
+
+            slow_speed_particles.emitterX = calc_x_speed_particles;
+            slow_speed_particles.emitterY = calc_y_speed_particles;
+            slow_speed_particles.emitting = slow_speed_particles_timer > 0;
+            if (slow_speed_particles_timer > 0) {
+                slow_speed_particles_timer -= delta;
+            }
+
             update_use_effects(delta, GFX_TOP);
             update_object_particles();
             u64 end_part = svcGetSystemTick();
@@ -623,6 +640,7 @@ void game_loop() {
 
     freeParticleData(&brick_destroy_particles.data);
     freeParticleData(&glitter_particles.data);
+    freeParticleData(&slow_speed_particles.data);
     unload_level();
 
     game_state = (state.custom_level ? STATE_EXTERNAL_LEVELS : STATE_LEVEL_SELECT);
