@@ -119,17 +119,13 @@ void cube_gamemode(Player *player) {
 
     drag_particles[state.current_player].gravityFlipped = player->upside_down;
     drag_particles[state.current_player].scale = (player->mini ? 0.6f : 1.0f);
-    
+    if (state.input.holdJump) {
+        jump = true;
+    }
+
     if (player->on_ground) {
         MotionTrail_StopStroke(trail);
         update_rotation_direction(player);
-
-        if (state.input.holdJump) {
-            jump = true;
-        } else {
-            set_p_velocity(player, 0, true);
-        }
-
         player->buffering_state = BUFFER_END;
 
         if (player->slope_data.slope_id < 0) player->rotation = roundf(player->rotation / 90.0f) * 90.0f;
