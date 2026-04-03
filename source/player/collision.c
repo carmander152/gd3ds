@@ -819,31 +819,30 @@ static inline float dot_product(float ax, float ay, float bx, float by) {
 }
 
 static bool sat_overlap(const Vec2D a[4], const Vec2D b[4]) {
-    // Test 4 axes (only from shape A, due to rectangle symmetry)
-    for (int i = 0; i < 4; ++i) {
-        // Normal perpendicular to edge
-        float dx = a[(i+1) & 3].x - a[i].x;
-        float dy = a[(i+1) & 3].y - a[i].y;
-        float ax = -dy, ay = dx;
-        
-        // Fast min/max using arithmetic instead of conditionals
-        float p0 = dot_product(a[0].x, a[0].y, ax, ay);
-        float p1 = dot_product(a[1].x, a[1].y, ax, ay);
-        float p2 = dot_product(a[2].x, a[2].y, ax, ay);
-        float p3 = dot_product(a[3].x, a[3].y, ax, ay);
-        
-        float minA = fminf(fminf(p0, p1), fminf(p2, p3));
-        float maxA = fmaxf(fmaxf(p0, p1), fmaxf(p2, p3));
-        
-        float q0 = dot_product(b[0].x, b[0].y, ax, ay);
-        float q1 = dot_product(b[1].x, b[1].y, ax, ay);
-        float q2 = dot_product(b[2].x, b[2].y, ax, ay);
-        float q3 = dot_product(b[3].x, b[3].y, ax, ay);
-        
-        float minB = fminf(fminf(q0, q1), fminf(q2, q3));
-        float maxB = fmaxf(fmaxf(q0, q1), fmaxf(q2, q3));
-        
-        if (maxA <= minB || maxB <= minA) return false;
+    // Test all axes (normals of edges)
+    for (int shape = 0; shape < 2; ++shape) {
+        const Vec2D *verts = (shape == 0) ? a : b;
+        for (int i = 0; i < 4; ++i) {
+            // Edge from verts[i] to verts[(i+1)%4]
+            float dx = verts[(i+1)%4].x - verts[i].x;
+            float dy = verts[(i+1)%4].y - verts[i].y;
+            // Normal axis
+            float ax = -dy, ay = dx;
+
+            // Project both shapes onto axis
+            float minA = INFINITY, maxA = -INFINITY;
+            float minB = INFINITY, maxB = -INFINITY;
+            for (int j = 0; j < 4; ++j) {
+                float projA = a[j].x * ax + a[j].y * ay;
+                float projB = b[j].x * ax + b[j].y * ay;
+                if (projA < minA) minA = projA;
+                if (projA > maxA) maxA = projA;
+                if (projB < minB) minB = projB;
+                if (projB > maxB) maxB = projB;
+            }
+            // If projections do not overlap, there is a separating axis
+            if (maxA <= minB || maxB <= minA) return false;
+        }
     }
     return true;
 }
@@ -940,9 +939,14 @@ void handle_collision(Player *player, int obj, const ObjectHitbox *hitbox) {
             bool gravSnap = false;
 
             clip += fabsf(state.old_player.vel_y) * delta;
+
+            bool bottom = gravBottom(player);
             
             if (player->slope_data.slope_id >= 0) {
-                return;
+                bottom = bottom + sinf(slope_angle(player->slope_data.slope_id, player)) * player->height / 2;
+                clip = 7;
+                if (obj_gravTop(player, obj) - bottom < 2)
+                    return;
             }
             
             // Collide with slope if object is an slope
@@ -962,20 +966,14 @@ void handle_collision(Player *player, int obj, const ObjectHitbox *hitbox) {
             }
             
             
-            bool slope_height_check = false;
-            if (player->touching_slope) {
-                if (grav_slope_orient(player->potentialSlope_id, player) == ORIENT_NORMAL_DOWN) {
-                    slope_height_check = gravBottom(player) < grav(player, objects.y[player->potentialSlope_id]);
-                } else if (grav_slope_orient(player->potentialSlope_id, player) == ORIENT_UD_DOWN) {
-                    slope_height_check = gravTop(player) > grav(player, objects.y[player->potentialSlope_id]);
-                }
-            }
-            bool slope_condition = player->touching_slope && !slope_touching(player->potentialSlope_id, player) && slope_height_check && (objects.orientation[player->potentialSlope_id] == ORIENT_NORMAL_DOWN || objects.orientation[player->potentialSlope_id] == ORIENT_UD_DOWN);
+            if (player->potentialSlope_id >= 0) {
+                unsigned char orient = objects.orientation[player->potentialSlope_id];
+                float block_comp = orient < 2 ? obj_getTop(obj) : obj_getBottom(obj);
+                float slope_comp = orient < 2 ? obj_getBottom(player->potentialSlope_id) : obj_getTop(player->potentialSlope_id);
 
-            // Snap the player to the potential slope when the player is touching the slope
-            if (player->touching_slope && slope_touching(player->potentialSlope_id, player) && slope_height_check) {
-                slope_collide(player->potentialSlope_id, player);
-                break;
+                if (block_comp - slope_comp < 2) {
+                    return;
+                }
             }
             
             bool safeZone = player->mini && ((obj_gravTop(player, obj) - gravBottom(player) <= clip) || (gravTop(player) - obj_gravBottom(player, obj) <= clip));
@@ -995,7 +993,7 @@ void handle_collision(Player *player, int obj, const ObjectHitbox *hitbox) {
                     state.dead = true;
                 }
             // Check snap for player bottom
-            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && player->vel_y <= 0 && !slope_condition && player->gamemode != GAMEMODE_DART) {
+            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && player->vel_y <= 0 && player->gamemode != GAMEMODE_DART) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
                 if (player->vel_y <= 0) player->vel_y = 0;
                 player->on_ground = true;
@@ -1020,7 +1018,7 @@ void handle_collision(Player *player, int obj, const ObjectHitbox *hitbox) {
                 }
                 // Behave normally
                 if (player->gamemode != GAMEMODE_PLAYER || gravSnap) {
-                    if (((gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y >= 0) || gravSnap) && !slope_condition) {
+                    if (((gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y >= 0) || gravSnap)) {
                         if (!gravSnap) player->on_ceiling = true;
                         else player->vel_y = 0;
                         player->inverse_rotation = false;
@@ -1077,7 +1075,6 @@ void collide_with_obj(Player *player, int obj) {
         bool checkColl = intersect(
             player->x, player->y, player->width, player->height, rotation, 
             x, y, width, height, obj_rot
-            
         );
 
         // Rotated hitboxes must also collide with the unrotated hitbox

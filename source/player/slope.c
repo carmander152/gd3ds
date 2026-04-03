@@ -562,6 +562,7 @@ bool slope_touching(int obj, Player *player) {
         int mult = grav_slope_orient(player->slope_data.slope_id, player) >= 2 ? -1 : 1;
         hasSlope = hasSlope && player->vel_y * mult <= 0;
     }
+    
     float deg = RadToDeg(fabsf(slope_angle(obj, player)));
     float snap_height = 20 * (deg / 45);
     float min = hasSlope ? -3 : 0;

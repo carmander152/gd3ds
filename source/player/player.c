@@ -680,6 +680,7 @@ void handle_player(Player *player) {
     player->velocity_override = false;
 
     player->gravObj_id = -1;
+    player->potentialSlope_id = -1;
     
     player->timeElapsed += STEPS_DT;
 
