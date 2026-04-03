@@ -666,6 +666,7 @@ float get_out_scale_fade(float x, int right_edge) {
 
 int get_obj_opacity(int obj, float x) {
     int opacity = obj_edge_fade(x, SCREEN_WIDTH / SCALE);
+    bool blending;
 
     switch (objects.id[obj]) {
         case 90:
@@ -682,18 +683,21 @@ int get_obj_opacity(int obj, float x) {
             if (objects.transition_applied[obj] == FADE_NONE) opacity = 255;
             break;
             
+        case 211:
+            blending = channels[objects.col_channel[obj]].blending;
+            if (!blending && objects.transition_applied[obj] == FADE_NONE) opacity = 255;
+            break;
         case 207:
         case 208:
         case 209:
         case 210:
-        case 211:
         case 212:
         case 213:
         case 693:
         case 694:
         case 331:
         case 333:
-            bool blending = channels[objects.detail_col_channel[obj]].blending;
+            blending = channels[objects.detail_col_channel[obj]].blending;
             if (!blending && objects.transition_applied[obj] == FADE_NONE) opacity = 255;
             break;
     }
