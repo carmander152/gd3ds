@@ -62,6 +62,7 @@ float normal_speed_particles_timer = 0.f;
 float fast_speed_particles_timer = 0.f;
 float faster_speed_particles_timer = 0.f;
 
+bool alt_title_screen;
 
 bool is_citra() {
     s64 version = 0;
@@ -771,6 +772,8 @@ int main(int argc, char* argv[]) {
     load_sfx();
 
     srand(time(NULL));
+
+    alt_title_screen = (rand() & (128 - 1)) == 0;
 
     top = C2D_CreateScreenTargetExt(GFX_TOP, GFX_LEFT, false);
     bot = C2D_CreateScreenTargetExt(GFX_BOTTOM, GFX_LEFT, false);

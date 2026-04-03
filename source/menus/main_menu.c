@@ -80,6 +80,12 @@ void main_menu_loop() {
     channels[CHANNEL_GROUND].color = col;
     channels[CHANNEL_LINE].color = white;
 
+    UIElement *title = ui_get_element_by_tag(&screen_top, "title");
+
+    if (title && alt_title_screen) {
+        ui_image_set_image(title, 3, 1);
+    }
+
     set_fade_status(FADE_STATUS_IN);
 
     if (!playing_menu_loop) {

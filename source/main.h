@@ -22,6 +22,8 @@ extern bool song_loaded;
 
 extern bool exiting_level;
 
+extern bool alt_title_screen;
+
 extern ParticleSystem touch_drag_particles;
 extern ParticleSystem touch_explosion_particles;
 
