@@ -112,3 +112,29 @@ void go_back_directory(char *path) {
         path[len - 1] = '\0';
     }
 }
+
+
+char *strip_filename(char *path) {
+    char *slash = strrchr(path, '/');
+    return slash ? slash + 1 : path;
+};
+
+
+void strip_extension(char *path) {
+    char *dot = strrchr(path, '.');
+    char *slash = strrchr(path, '/');
+
+    // Make sure the dot is after the last slash
+    if (dot && (!slash || dot > slash)) {
+        *dot = '\0';
+    }
+}
+
+void truncate_filename(char *name, size_t max_len) {
+    size_t len = strlen(name);
+
+    if (len > max_len) {
+        name[max_len] = '\0';
+        strcat(name, "...");
+    }
+}

@@ -21,6 +21,8 @@
 #include "menus/settings.h"
 #include "menus/gameplay.h"
 
+#include "menus/components/ui_screen.h"
+
 const Color white = { 255, 255, 255 };
 
 int sprite_count = 0;
@@ -862,6 +864,23 @@ void draw_ground(float cam_x, float cam_y, float y, bool is_ceiling, int screen_
         C2D_SpriteSetScale(&ground, 1.f, mult);
         C2D_DrawSpriteTinted(&ground, &tint);
     }
+
+    C2D_PlainImageTint(&tint, C2D_Color32(0, 0, 0, 100), 1.f);
+    C2D_Sprite ground_shadow = { 0 };
+
+    C2D_SpriteFromSheet(&ground_shadow, ui_sheet, 361);
+    C3D_TexSetFilter(ground_shadow.image.tex, GPU_LINEAR, GPU_LINEAR);
+
+    // Left shadow
+    C2D_SpriteSetPos(&ground_shadow, 0, calc_y);
+    C2D_SpriteSetScale(&ground_shadow, 1.f, 1.f);
+    C2D_DrawSpriteTinted(&ground_shadow, &tint);
+
+    // Right shadow
+    C2D_SpriteSetPos(&ground_shadow, screen_width / SCALE, calc_y);
+    C2D_SpriteSetCenter(&ground_shadow, 1.f, 0.f);
+    C2D_SpriteSetScale(&ground_shadow, -1.f, 1.f);
+    C2D_DrawSpriteTinted(&ground_shadow, &tint);
 
     // Then draw the line
     if (channels[CHANNEL_LINE].blending) {

@@ -119,3 +119,4 @@ bool obj_has_detail(const GameObject *obj);
 char *get_level_name(char *data_ptr);
 char *load_user_song(int id, size_t *out_size); 
 bool check_song(int id);
+char *extract_gmd_key(const char *data, const char *key, const char *type);

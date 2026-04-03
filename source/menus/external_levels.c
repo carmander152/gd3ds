@@ -66,25 +66,21 @@ void load_level_folder(char *folder) {
     ui_list_reset(list);
     int count = 0;
     FileOrFolder *entries = load_folder(folder, &count);
-    size_t size;
+    char level_name[256];
     if (entries && list) {
         for (int i = 0; i < count && i < UI_LIST_MAX_ITEMS; i++) {
             FileOrFolder *entry = &entries[i];
-            char *name = "Error";
             if (entry->is_dir) {
                 // Folder
-                name = "folder";
+                char *name = strip_filename(entry->name);
                 texts[i] = ui_create_external_level_card(0, 0, 320, 0, name, entry->name, open_folder, NULL);
                 ui_list_add(list, &texts[i]);
             } else {
-                // Level
-                char *data = read_file(entry->name, &size);
-                if (data) {
-                    name = get_level_name(data);
-                    free(data);
-                }
-
-                texts[i] = ui_create_external_level_card(0, 0, 239, 0, name, entry->name, open_level, NULL);
+                strncpy(level_name, entry->name, 255);
+                strip_extension(level_name);
+                char *name = strip_filename(level_name);
+                truncate_filename(name, 16);
+                texts[i] = ui_create_external_level_card(0, 0, 420, 0, name, entry->name, open_level, NULL);
                 ui_list_add(list, &texts[i]);
             }
         }
