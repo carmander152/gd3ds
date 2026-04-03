@@ -369,6 +369,8 @@ bool player_circle_touches_slope(int obj, Player *player) {
 }
 
 void slope_collide(int obj, Player *player) {
+    player->potentialSlope_id = obj;
+    
     int clip = (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_BIRD) ? 7 : 10;
     int orient = grav_slope_orient(obj, player);  
     int mult = orient >= ORIENT_UD_DOWN ? -1 : 1;

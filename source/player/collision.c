@@ -1168,23 +1168,6 @@ void collide_with_objects(Player *player) {
         clear_slope_data(player);
     }
 
-    float closestDist = 999999.f;
-    // Detect if touching slope
-    for (int i = 0; i < slope_count; i++) {
-        int obj = slope_buffer[i];
-        if (intersect(
-            player->x, player->y, player->width, player->height, 0, 
-            objects.x[obj], objects.y[obj], objects.width[obj], objects.height[obj], objects.rotation[obj]
-        )) {
-            float dist = fabsf(objects.y[obj] - player->y);
-            if (dist < closestDist) {
-                player->touching_slope = true;
-                player->potentialSlope_id = obj;
-                closestDist = dist; 
-            }
-        }
-    }
-
     for (int i = 0; i < block_count; i++) {
         int obj = block_buffer[i];
         collide_with_obj(player, obj);
