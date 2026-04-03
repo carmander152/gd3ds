@@ -252,17 +252,17 @@ int get_glow_channel(int id) {
 }
 
 const int obj_9_random_layers[4] = {
-    585,
-    589,
+    586,
     590,
-    589
+    591,
+    590
 };
 
 const int obj_135_random_layers[4] = {
-    610,
     611,
     612,
-    613
+    613,
+    614
 };
 
 int get_obj_random_layer(int obj, int id) {
