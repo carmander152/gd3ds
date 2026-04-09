@@ -3,6 +3,7 @@
 #include "ui_button.h"
 #include "ui_image.h"
 #include "ui_label.h"
+#include "ui_label_aller.h"
 #include "ui_screen.h"
 #include "ui_checkbox.h"
 #include "ui_window.h"
@@ -28,6 +29,7 @@ C2D_SpriteSheet ui_sheet;
 C2D_SpriteSheet ui_2_sheet;
 C2D_SpriteSheet window_sheet;
 C2D_SpriteSheet bigFont_sheet;
+C2D_SpriteSheet chatFont_sheet;
 C2D_SpriteSheet bg_gradient_sheet;
 C2D_SpriteSheet bar_sheet;
 
@@ -36,6 +38,7 @@ void ui_assets_init() {
     ui_2_sheet = C2D_SpriteSheetLoad("romfs:/gfx/ui_2.t3x");
     window_sheet = C2D_SpriteSheetLoad("romfs:/gfx/windows.t3x");
     bigFont_sheet = C2D_SpriteSheetLoad("romfs:/gfx/bigFont.t3x");
+    chatFont_sheet = C2D_SpriteSheetLoad("romfs:/gfx/chatFont.t3x");
     bg_gradient_sheet = C2D_SpriteSheetLoad("romfs:/gfx/bg_gradient.t3x");
     bar_sheet = C2D_SpriteSheetLoad("romfs:/gfx/bars.t3x");
 }
@@ -387,6 +390,9 @@ void ui_load_screen(UIScreen* screen,
         } else if (strcmp(type, "label") == 0) {
             screen->elements[screen->count++] =
                 ui_create_label(x, y, scale, text, align, tag);
+        } else if (strcmp(type, "label_aller") == 0) {
+            screen->elements[screen->count++] =
+                ui_create_label_aller(x, y, scale, text, align, tag);
         } else if (strcmp(type, "checkbox") == 0) {
             screen->elements[screen->count++] =
                 ui_create_checkbox(
