@@ -953,7 +953,7 @@ void create_objects() {
                 if (calc_y < -60 || calc_y >= (SCREEN_HEIGHT / SCALE) + 60) continue;
 
                 // Skip invalid objects
-                if (objects.id[obj] > 745) {
+                if (!is_valid_object(objects.id[obj]) || objects.toggled[obj]) {
                     continue;
                 }
 
