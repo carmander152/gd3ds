@@ -900,8 +900,9 @@ void draw_ground(float cam_x, float cam_y, float y, bool is_ceiling, int screen_
     C2D_Sprite line = { 0 };
     C2D_SpriteFromSheet(&line, groundSheet, 0);
     C3D_TexSetFilter(line.image.tex, GPU_LINEAR, GPU_LINEAR);
-    C2D_SpriteSetPos(&line, screen_width / SCALE / 2, (int)((GROUND_SIZE / 2) + calc_y + line_offset));
     C2D_SpriteSetCenter(&line, 0.5f, 0.5f);
+    C2D_SpriteSetPos(&line, screen_width / SCALE / 2, (GROUND_SIZE / 2) + calc_y + line_offset);
+    C2D_SpriteSetScale(&line, 1.f, 0.75f);
     C2D_DrawSpriteTinted(&line, &tint);
 
     if (channels[CHANNEL_LINE].blending) {
