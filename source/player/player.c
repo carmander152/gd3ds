@@ -679,6 +679,12 @@ void handle_player(Player *player) {
 
     player->frame++;
 
+    // If new vel y is no the max (not set) set vel y
+    if (player->new_vel_y != __FLT_MAX__) {
+        player->vel_y = player->new_vel_y;
+        player->new_vel_y = __FLT_MAX__;
+    }
+
     u64 start = svcGetSystemTick();
     collide_with_objects(player);
     u64 end = svcGetSystemTick();

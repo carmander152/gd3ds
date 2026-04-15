@@ -183,7 +183,7 @@ void slope_calc(int obj, Player *player) {
 
         // Sliding off slope
         if (gravBottom(player) >= obj_gravTop(player, obj)) {
-            float vel = 0.9f * MIN(1.12 / slope_angle(obj, player), 1.54) * (objects.height[obj] * player_speeds[state.speed] / objects.width[obj]);
+            float vel = 0.9f * MIN(1.12f / slope_angle(obj, player), 1.54f) * (objects.height[obj] * player_speeds[state.speed] / objects.width[obj]);
             float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
             
             //float orig = vel;
@@ -201,7 +201,7 @@ void slope_calc(int obj, Player *player) {
 
             vel *= time;
 
-            player->vel_y = vel;
+            player->new_vel_y = vel;
             player->inverse_rotation = true;
             player->coyote_slope = player->slope_data;
             player->slope_slide_coyote_time = 2;
@@ -220,7 +220,7 @@ void slope_calc(int obj, Player *player) {
 
         if (obj_gravTop(player, obj) <= grav(player, player->y) || getLeft(player) - obj_getRight(obj) > 0) {
             float vel = -falls[state.speed] * ((float) objects.height[obj] / objects.width[obj]);
-            player->vel_y = vel;
+            player->new_vel_y = vel;
             clear_slope_data(player);
         }
     } else if (orientation == ORIENT_UD_UP) { // Upside down - up
@@ -243,7 +243,7 @@ void slope_calc(int obj, Player *player) {
 
         // Sliding off slope
         if (gravTop(player) <= obj_gravBottom(player, obj)) {
-            float vel = 0.9f * MIN(1.12 / slope_angle(obj, player), 1.54) * (objects.height[obj] * player_speeds[state.speed] / objects.width[obj]);
+            float vel = 0.9f * MIN(1.12f / slope_angle(obj, player), 1.54f) * (objects.height[obj] * player_speeds[state.speed] / objects.width[obj]);
             float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
             
             //float orig = vel;
@@ -261,7 +261,7 @@ void slope_calc(int obj, Player *player) {
 
             vel *= time;
 
-            player->vel_y = -vel;
+            player->new_vel_y = -vel;
             
             player->inverse_rotation = true;
             player->coyote_slope = player->slope_data;
@@ -289,7 +289,7 @@ void slope_calc(int obj, Player *player) {
         // Sliding off
         if (obj_gravTop(player, obj) <= grav(player, player->y) || getLeft(player) - obj_getRight(obj) > 0) {
             float vel = falls[state.speed] * ((float) objects.height[obj] / objects.width[obj]);
-            player->vel_y = vel;
+            player->new_vel_y = vel;
             clear_slope_data(player);
         }
     }

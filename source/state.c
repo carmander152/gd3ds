@@ -200,6 +200,7 @@ void init_variables() {
     player->y = player->height / 2;
     player->vel_x = player_speeds[state.speed];  
     player->vel_y = 0;
+    player->new_vel_y = __FLT_MAX__;
     player->frame = 0;
     state.ground_y = 0;
     state.ceiling_y = 999999;
