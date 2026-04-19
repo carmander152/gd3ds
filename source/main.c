@@ -175,7 +175,6 @@ void game_loop() {
         path = state.custom_level_path;
     } else {
         path = main_levels[curr_level_id].gmd_path;
-        level_info.level_name = main_levels[curr_level_id].level_name;
     }
 
     int returned = load_level(path);
@@ -183,6 +182,10 @@ void game_loop() {
         printf("\x1b[9;1HFailed %d", returned);
         game_state = (state.custom_level ? STATE_EXTERNAL_LEVELS : STATE_LEVEL_SELECT);
         return;
+    }
+
+    if (!state.custom_level) {
+        level_info.level_name = main_levels[curr_level_id].level_name;
     }
     
 
