@@ -23,34 +23,24 @@ void activate_move_trigger(int group, float x, float y, float duration, bool loc
     }
 }
 
-void update_triggers(float delta) {
+void update_move_triggers(float delta) {
     for (int i = 0; i < MAX_ACTIVE_MOVE_TRIGGERS; i++) {
         if (!move_triggers[i].active) continue;
 
         MoveTrigger *t = &move_triggers[i];
         t->elapsed += delta;
-        
         float progress = t->elapsed / t->duration;
         if (progress > 1.0f) progress = 1.0f;
 
-        // Calculate how much we need to move THIS frame
-        float current_x_target = t->move_x * progress;
-        float current_y_target = t->move_y * progress;
+        float dx = (t->move_x * progress) - (t->move_x * t->last_progress);
+        float dy = (t->move_y * progress) - (t->move_y * t->last_progress);
         
-        float dx = current_x_target - (t->move_x * t->last_progress);
-        float dy = current_y_target - (t->move_y * t->last_progress);
-        
-        if (t->lock_to_player_x) {
-            dx = state.player.vel_x * delta;
-        }
+        if (t->lock_to_player_x) dx = state.player.vel_x * delta;
 
-        // Apply movement to all objects in the group
         for (int j = 0; j < objects.count; j++) {
             if (objects.group_id[j] == t->target_group) {
                 objects.x[j] += dx;
                 objects.y[j] += dy;
-                // Note: On 3DS, you may need to update the section hash 
-                // if objects move too far, but for small moves, this works.
             }
         }
 
