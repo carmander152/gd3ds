@@ -105,19 +105,17 @@ typedef struct {
     int p1_trail_pos;
     P1Trail p1_trail_data[P1_TRAIL_LENGTH];
 
-    // --- 2.0 ROBOT ADDITIONS ---
+    // Robot Logic
     float robot_air_time;
-    float robot_anim_timer;
-    int curr_robot_animation_id;
 } Player;
 
 enum Gamemodes {
-    GAMEMODE_PLAYER,      // Cube
+    GAMEMODE_PLAYER,
     GAMEMODE_SHIP,
     GAMEMODE_PLAYER_BALL,
-    GAMEMODE_BIRD,        // UFO
-    GAMEMODE_DART,        // Wave
-    GAMEMODE_ROBOT        // Robot (2.0)
+    GAMEMODE_BIRD,
+    GAMEMODE_DART,
+    GAMEMODE_ROBOT
 };
 
 enum BufferingState {
