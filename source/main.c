@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
 #include "objects.h"
 #include "objects_array.h"
 #include "level_loading.h"
@@ -12,6 +13,12 @@
 #include "state.h"
 #include "player/player.h"
 #include "triggers.h"
+
+// --- Missing Declarations for Menu & Flow ---
+#include "menus/main_levels.h" 
+#include "menus/main_menu.h"
+#include "menus/gameplay.h"
+// ------------------------------------------
 
 C3D_RenderTarget* top;
 C3D_RenderTarget* bot;
