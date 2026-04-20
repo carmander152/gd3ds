@@ -23,10 +23,10 @@
 // ------------------------------------
 
 // --- LINKER POLYFILLS (Missing Wii Port Data) ---
-bool is_citra = false;
+bool is_citra() { return false; }
 int frame_skipped = 0;
-int level_frame = 0;
-const float player_speeds[5] = { 251.16f, 311.58f, 387.42f, 468.0f, 576.0f };
+unsigned int level_frame = 0;
+const float player_speeds[SPEED_COUNT] = { 251.16f, 311.58f, 387.42f, 468.0f };
 
 // Missing Particle Arrays
 ParticleSystem drag_particles[2];
@@ -51,14 +51,14 @@ MotionTrail trail_p2;
 MotionTrail wave_trail_p1;
 MotionTrail wave_trail_p2;
 
-// Missing Menu and Debug Functions
-void alt_title_screen() {}
-void playing_menu_loop() {}
+// Missing Menu and Debug Functions/Variables
+bool alt_title_screen = false;
+bool playing_menu_loop = false;
 void draw_hitbox(int obj_index) {}
 void draw_player_hitbox(Player *player) {}
 void draw_hitbox_trail(int param) {}
 void draw_p1_trail(Player *player) {}
-void output_log(const char* fmt, ...) {}
+int output_log(const char* fmt, ...) { return 0; }
 
 // Missing Physics Function (Crucial for the Robot's jump!)
 void set_p_velocity(Player* player, float velocity, bool override) {
