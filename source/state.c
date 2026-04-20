@@ -8,6 +8,10 @@
 #include "particles/circles.h"
 #include "particles/particles.h"
 
+// --- Missing Particle Declaration ---
+extern ParticleSystem explosion_particles[2];
+// ------------------------------------
+
 GameState state;
 
 void run_camera() {
