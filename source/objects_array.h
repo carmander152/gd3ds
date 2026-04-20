@@ -34,9 +34,9 @@ typedef struct {
     u8* activated;
     u8* collided;
 
-    // 2.0 Additions
+    // 2.0 Movement & Alpha System
     int* group_id; 
-    float* opacity; // Added to support Alpha Triggers
+    float* opacity;
 } ObjectsArray;
 
 extern ObjectsArray objects;
