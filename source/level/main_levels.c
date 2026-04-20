@@ -127,4 +127,11 @@ MainLevelDefinition main_levels[] = {
         .difficulty = MAIN_DIFF_DEMON,
         .stars = 14
     },
+    {
+        .level_name = "Geometrical Dominator",
+        .gmd_path = "sdmc:/gd3ds/levels/GeometricalDominator.gmd",
+        .song_path = "sdmc:/gd3ds/songs/GeometricalDominator.mp3", 
+        .difficulty = MAIN_DIFF_HARDER,
+        .stars = 10
+    }
 };
