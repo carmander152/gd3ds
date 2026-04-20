@@ -32,11 +32,13 @@ void update_move_triggers(float delta) {
         float progress = t->elapsed / t->duration;
         if (progress > 1.0f) progress = 1.0f;
 
+        // Calculate delta for this frame
         float dx = (t->move_x * progress) - (t->move_x * t->last_progress);
         float dy = (t->move_y * progress) - (t->move_y * t->last_progress);
         
         if (t->lock_to_player_x) dx = state.player.vel_x * delta;
 
+        // Move all objects in the group
         for (int j = 0; j < objects.count; j++) {
             if (objects.group_id[j] == t->target_group) {
                 objects.x[j] += dx;
