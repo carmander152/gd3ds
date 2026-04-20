@@ -1,10 +1,10 @@
 #include <citro2d.h>
 #include <malloc.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include "objects.h"
+#include "objects_array.h"
 #include "level_loading.h"
 #include "main.h"
 #include "graphics.h"
@@ -15,8 +15,6 @@
 int game_state = STATE_MAIN_MENU;
 C3D_RenderTarget* top;
 C3D_RenderTarget* bot;
-float delta = 0;
-unsigned int frame_counter = 0;
 
 void game_loop() {
     char *path = state.custom_level ? state.custom_level_path : main_levels[curr_level_id].gmd_path;
@@ -38,7 +36,7 @@ void game_loop() {
         state.input.pressedJump = (kDown & KEY_A) || (kDown & KEY_UP);
 
         u64 now = svcGetSystemTick();
-        delta = (now - lastTime) / (CPU_TICKS_PER_MSEC * 1000.0f);
+        float delta = (now - lastTime) / (CPU_TICKS_PER_MSEC * 1000.0f);
         lastTime = now;
         if (delta > 0.1f) delta = STEPS_DT_UNMOD;
 
@@ -47,7 +45,7 @@ void game_loop() {
             while (accumulator >= STEPS_DT_UNMOD) {
                 state.old_player = state.player;
                 handle_player(&state.player);
-                update_move_triggers(STEPS_DT_UNMOD); // Update block movement
+                update_move_triggers(STEPS_DT_UNMOD); // Update 2.0 Block movement
                 
                 if (state.dual) {
                     state.old_player = state.player2;
@@ -60,12 +58,13 @@ void game_loop() {
 
         C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
         C2D_SceneBegin(top);
-        C2D_TargetClear(top, C2D_Color32(0, 0, 50, 255));
+        C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
+        
         draw_objects();
         draw_player(&state.player);
-        if (state.dual) draw_player(&state.player2);
-        C3D_FrameEnd(0);
+        if(state.dual) draw_player(&state.player2);
         
+        C3D_FrameEnd(0);
         if (kDown & KEY_START) break;
     }
     unload_level();
@@ -84,7 +83,7 @@ int main(int argc, char* argv[]) {
     while (aptMainLoop()) {
         switch (game_state) {
             case STATE_GAME: game_loop(); break;
-            default: game_state = STATE_GAME; break; 
+            default: game_state = STATE_GAME; break;
         }
     }
 
