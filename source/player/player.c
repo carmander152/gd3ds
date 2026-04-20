@@ -11,13 +11,7 @@
 #include "utils/gfx.h"
 #include "triggers.h"
 
-// Physics Constants
-const float cube_jump_heights[SPEED_COUNT] = { 585.0f, 600.0f, 615.0f, 630.0f };
-const float cube_accelerations[SPEED_COUNT] = { -2700.0f, -2794.0f, -2850.0f, -2900.0f };
-
 inline float gravFloor(Player *player) { return player->upside_down ? -state.ceiling_y : state.ground_y; }
-
-// --- Gamemode Logic ---
 
 void cube_gamemode(Player *player) {
     if (player->on_ground) {
@@ -71,7 +65,6 @@ void wave_gamemode(Player *player) {
 void robot_gamemode(Player *player) {
     if (player->vel_y < -810) player->vel_y = -810;
     
-    // Jump Initiation
     if (player->on_ground && state.input.holdJump && player->buffering_state == BUFFER_READY) {
         set_p_velocity(player, cube_jump_heights[state.speed] * 0.6f, false);
         player->on_ground = false;
@@ -81,7 +74,6 @@ void robot_gamemode(Player *player) {
         player->velocity_override = true;
     }
     
-    // Thrust Logic (Holding the button)
     if (player->robot_air_time >= 0.35f || (!state.input.holdJump)) {   
         player->gravity = cube_accelerations[state.speed]; 
         player->velocity_override = false;
@@ -94,14 +86,10 @@ void robot_gamemode(Player *player) {
     }
 }
 
-// --- Player Core ---
-
 void run_player(Player *player) {
-    // Reset ground state
     player->on_ground = false;
     player->on_ceiling = false;
 
-    // Basic Boundary Collision
     if (getGroundBottom(player) <= state.ground_y) {
         player->y = state.ground_y + (player->height / 2);
         player->on_ground = !player->upside_down;
@@ -113,7 +101,6 @@ void run_player(Player *player) {
         player->vel_y = 0;
     }
 
-    // Process Gamemodes
     switch (player->gamemode) {
         case GAMEMODE_PLAYER:      cube_gamemode(player); break;
         case GAMEMODE_SHIP:        ship_gamemode(player); break;
@@ -123,39 +110,30 @@ void run_player(Player *player) {
         case GAMEMODE_ROBOT:       robot_gamemode(player); break;
     }
 
-    // Apply Velocity
     if (!player->velocity_override) {
         player->vel_y += player->gravity * STEPS_DT;
     }
     player->y += player->vel_y * STEPS_DT;
     player->x += player->vel_x * STEPS_DT;
 
-    // Rotation Lerp for smoothness
     player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
 }
-
-// --- Rendering ---
 
 void draw_robot(Player *player, float x, float y, float scale, u32 col1, u32 col2) {
     bool flip = (state.mirror_mult < 0);
     float p_rot = player->lerp_rotation;
-    
-    // Simple walk cycle math
     float leg_rot = 0;
     if (player->on_ground) {
         leg_rot = sinf(player->x * 0.15f) * 40.0f;
     }
 
-    // NOTE: Replace these with the actual constants from your generated sprites.h
-    // They are usually: icons_robot_01_01_001_idx, etc.
-    
-    /* C2D_DrawSprite(get_sprite(icons_robot_01_03_001_idx), x, y, p_rot + leg_rot, scale, col1, col2, flip); // Back Leg
-    C2D_DrawSprite(get_sprite(icons_robot_01_02_001_idx), x, y, p_rot, scale, col1, col2, flip);           // Body
-    C2D_DrawSprite(get_sprite(icons_robot_01_01_001_idx), x, y, p_rot, scale, col1, col2, flip);           // Head
-    C2D_DrawSprite(get_sprite(icons_robot_01_04_001_idx), x, y, p_rot - leg_rot, scale, col1, col2, flip); // Front Leg
+    // Replace indices with your actual generated icons.h constants!
+    /*
+    spawn_icon_part(robot_01_03_idx, x, y, p_rot + leg_rot, scale, col1, col2, flip);
+    spawn_icon_part(robot_01_02_idx, x, y, p_rot, scale, col1, col2, flip);
+    spawn_icon_part(robot_01_01_idx, x, y, p_rot, scale, col1, col2, flip);
+    spawn_icon_part(robot_01_04_idx, x, y, p_rot - leg_rot, scale, col1, col2, flip);
     */
-
-    // Placeholder: Draw a colored box until you verify your Sprite IDs
     C2D_DrawRectangle(x - 15, y - 15, 0, 30, 30, col1, col1, col1, col1);
 }
 
@@ -179,12 +157,7 @@ void draw_player(Player *player) {
 
 void handle_player(Player *player) {
     if (state.dead) return;
-    
-    // Update buffering
     if (state.input.pressedJump) player->buffering_state = BUFFER_READY;
-    
     run_player(player);
-    
-    // Reset buffer if not used
     if (!state.input.holdJump) player->buffering_state = BUFFER_NONE;
 }
