@@ -17,5 +17,5 @@ typedef struct {
 extern MoveTrigger move_triggers[MAX_ACTIVE_MOVE_TRIGGERS];
 
 void init_triggers();
-void update_triggers(float delta);
+void update_move_triggers(float delta);
 void activate_move_trigger(int group, float x, float y, float duration, bool lock_x);
