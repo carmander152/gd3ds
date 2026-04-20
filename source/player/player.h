@@ -32,73 +32,31 @@ typedef struct {
 
 typedef struct {
     int gamemode;
-    float x;
-    float y;
-    float rot;
-    float scale;
-    float delta_scale;
-    float opacity;
-    float life;
-    bool upside_down;
-    bool active;
+    float x, y, rot, scale, delta_scale, opacity, life;
+    bool upside_down, active;
 } P1Trail;
 
 typedef struct {
-    float x;
-    float y;
-    float vel_x;
-    float vel_y;
-    float new_vel_y;
-    float delta_y;
-    float gravity;
-    float rotation;
-    float lerp_rotation;
-    float width;
-    float height;
-
+    float x, y, vel_x, vel_y, new_vel_y, delta_y, gravity, rotation, lerp_rotation, width, height;
     InternalHitbox internal_hitbox;
-
     int gamemode;
     int rotation_direction;
-
-    bool on_ground;
-    bool on_ceiling;
-    bool mini;
-    bool upside_down;
-    bool touching_slope;
-    bool inverse_rotation;
-    bool snap_rotation;
-    
+    bool on_ground, on_ceiling, mini, upside_down, touching_slope, inverse_rotation, snap_rotation;
     int potentialSlope_id;
     bool left_ground;
-
-    float ball_rotation_speed;
-    float cutscene_timer;
+    float ball_rotation_speed, cutscene_timer;
     int buffering_state;
-    float time_since_ground;
-    float ufo_last_y;
-    float ceiling_inv_time;
-    float timeElapsed;
+    float time_since_ground, ufo_last_y, ceiling_inv_time, timeElapsed;
     int gravObj_id;
-
-    float burst_particle_timer;
-    float cutscene_initial_player_x;
-    float cutscene_initial_player_y;
-    int slope_slide_coyote_time;
-    int frame;
-
-    SlopeData coyote_slope;
-    SlopeData slope_data;
+    float burst_particle_timer, cutscene_initial_player_x, cutscene_initial_player_y;
+    int slope_slide_coyote_time, frame;
+    SlopeData coyote_slope, slope_data;
     SnapData snap_data;
-
     bool velocity_override;
     float coyote_frames;
-    
     int p1_trail_pos;
     P1Trail p1_trail_data[10];
-
-    // Robot Logic
-    float robot_air_time;
+    float robot_air_time; // 2.0 variable jump
 } Player;
 
 enum BufferingState {
