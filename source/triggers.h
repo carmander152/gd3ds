@@ -1,6 +1,5 @@
 #pragma once
 #include "state.h"
-#include "objects_array.h"
 
 #define MAX_ACTIVE_MOVE_TRIGGERS 128
 
