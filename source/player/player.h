@@ -110,12 +110,12 @@ typedef struct {
 } Player;
 
 enum Gamemodes {
-    GAMEMODE_PLAYER,
+    GAMEMODE_PLAYER,      // Cube
     GAMEMODE_SHIP,
     GAMEMODE_PLAYER_BALL,
-    GAMEMODE_BIRD,
-    GAMEMODE_DART,
-    GAMEMODE_ROBOT
+    GAMEMODE_BIRD,        // UFO
+    GAMEMODE_DART,        // Wave
+    GAMEMODE_ROBOT        // Robot
 };
 
 enum BufferingState {
@@ -165,51 +165,16 @@ extern const float cube_accelerations[];
 
 inline float getTop(Player *player)  { return player->y + player->height / 2; }
 inline float getBottom(Player *player)  { return player->y - player->height / 2; }
-
 inline float getGroundTop(Player *player)  { return player->y + (player->height / 2) + ((player->gamemode == GAMEMODE_DART) ? (player->mini ? 3 : 5) : 0); }
 inline float getGroundBottom(Player *player)  { return player->y - (player->height / 2) - ((player->gamemode == GAMEMODE_DART) ? (player->mini ? 3 : 5) : 0); }
-
 inline float getRight(Player *player)  { return player->x + player->width / 2; }
 inline float getLeft(Player *player)  { return player->x - player->width / 2; }
-
-inline float getInternalTop(Player *player)  { return player->y + player->internal_hitbox.height / 2; }
-inline float getInternalBottom(Player *player)  { return player->y - player->internal_hitbox.height / 2; }
-inline float getInternalRight(Player *player)  { return player->x + player->internal_hitbox.width / 2; }
-inline float getInternalLeft(Player *player)  { return player->x - player->internal_hitbox.width / 2; }
-
 inline float gravBottom(Player *player) { return player->upside_down ? -getTop(player) : getBottom(player); }
 inline float gravTop(Player *player) { return player->upside_down ? -getBottom(player) : getTop(player); }
-
-inline float gravInternalBottom(Player *player) { return player->upside_down ? -getInternalTop(player) : getInternalBottom(player); }
-inline float gravInternalTop(Player *player) { return player->upside_down ? -getInternalBottom(player) : getInternalTop(player); }
-
 inline float grav(Player *player, float val) { return player->upside_down ? -val : val; }
-
-inline float obj_getTop(int object)  { 
-    return objects.y[object] + objects.height[object] / 2; 
-}
-inline float obj_getBottom(int object)  { 
-    return objects.y[object] - objects.height[object] / 2; 
-}
-inline float obj_getRight(int object)  {  
-    return objects.x[object] + objects.width[object] / 2; 
-}
-inline float obj_getLeft(int object)  { 
-    return objects.x[object] - objects.width[object] / 2; 
-}
-inline float obj_gravBottom(Player *player, int object) { return player->upside_down ? -obj_getTop(object) : obj_getBottom(object); }
-inline float obj_gravTop(Player *player, int object) { return player->upside_down ? -obj_getBottom(object) : obj_getTop(object); }
 
 void handle_player(Player *player);
 void draw_player(Player *player);
 void run_player(Player *player);
-
-void draw_hitbox(int obj);
-void draw_player_hitbox(Player *player);
-void draw_hitbox_trail(int player);
-void add_new_hitbox(Player *player);
-
 void update_p1_trail(Player *player);
-void draw_p1_trail(Player *player);
-
 void update_rotation_direction(Player *player);
