@@ -1,110 +1,62 @@
 #include "player.h"
 #include "state.h"
-#include "icons.h"
 #include "graphics.h"
-#include "particles/particles.h"
-#include "slope.h"
-#include "menus/icon_kit.h"
-#include "collision.h"
+#include "triggers.h"
 #include "math_helpers.h"
-#include "main.h"
-#include "utils/gfx.h"
-
-inline float gravFloor(Player *player) { return player->upside_down ? -state.ceiling_y : state.ground_y; }
 
 void robot_gamemode(Player *player) {
-    trail->positionR = (Vec2){player->x, player->y};  
-    trail->startingPositionInitialized = true;
-
     if (player->vel_y < -810) player->vel_y = -810;
-    if (player->y > 2794.f) state.dead = true;
-
-    if (player->on_ground) {
-        MotionTrail_StopStroke(trail);
-        update_rotation_direction(player);
-        if (player->slope_data.slope_id < 0) player->rotation = 0;
-    }
-
-    // Initial Hop
-    if ((player->slope_data.slope_id >= 0 || player->on_ground) && 
-        (state.input.holdJump && player->buffering_state == BUFFER_READY)) {
-        
-        set_p_velocity(player, cube_jump_heights[state.speed] / 1.8f, false);
+    
+    // Jump Initiation
+    if (player->on_ground && state.input.holdJump && player->buffering_state == BUFFER_READY) {
+        set_p_velocity(player, cube_jump_heights[state.speed] * 0.6f, false);
         player->on_ground = false;
         player->buffering_state = BUFFER_END;
         player->robot_air_time = 0.f;
         player->gravity = 0; 
         player->velocity_override = true;
     }
-
-    // Variable Height Logic (2.0)
-    if (player->robot_air_time >= 1.5f || (!state.input.holdJump)) {   
-        player->gravity = cube_accelerations[state.speed] * 0.9f;
+    
+    // Thrust Logic (Holding the button)
+    if (player->robot_air_time >= 0.35f || (!state.input.holdJump)) {   
+        player->gravity = cube_accelerations[state.speed]; 
         player->velocity_override = false;
     } else if (player->buffering_state == BUFFER_END) {
-        player->robot_air_time += 5.4f * STEPS_DT;
+        player->robot_air_time += STEPS_DT;
     }
 }
 
-// ... (Your other cube, ship, ball, ufo, wave gamemode functions) ...
-
-void run_player(Player *player) {
-    float scale = (player->mini) ? 0.6f : 1.f;
-    trail->stroke = 10.f * scale;
+// Modular Drawing logic for the Robot
+void draw_robot(Player *player, float x, float y, float scale, u32 col1, u32 col2) {
+    bool flip = (state.mirror_mult < 0);
+    float p_rot = player->lerp_rotation;
     
-    if (!player->left_ground) {
-        if (getGroundBottom(player) <= state.ground_y) {
-            player->on_ground = !player->upside_down;
-            player->on_ceiling = player->upside_down;
-            player->time_since_ground = 0; 
-        } 
-        if (getGroundTop(player) >= state.ceiling_y) {
-            player->on_ground = player->upside_down;
-            player->on_ceiling = !player->upside_down;
-            player->time_since_ground = 0; 
-        } 
+    // Simple walk cycle math
+    float leg_rot = 0;
+    if (player->on_ground) {
+        leg_rot = sinf(player->x * 0.15f) * 40.0f;
     }
 
-    switch (player->gamemode) {
-        case GAMEMODE_PLAYER: cube_gamemode(player); break;
-        case GAMEMODE_SHIP: ship_gamemode(player); break;
-        case GAMEMODE_PLAYER_BALL: ball_gamemode(player); break;
-        case GAMEMODE_BIRD: ufo_gamemode(player); break;
-        case GAMEMODE_DART: wave_gamemode(player); break;
-        case GAMEMODE_ROBOT: robot_gamemode(player); break;
-    }
+    // You will need to map these to the actual C2D_Sprite IDs generated in icons.h
+    // Example order: Back Leg -> Body -> Head -> Front Leg
+    // Note: I'm assuming you have a spawn_part helper, if not, call C2D_DrawSprite directly
     
-    player->time_since_ground += STEPS_DT;
-    if (!player->velocity_override) player->vel_y += player->gravity * STEPS_DT;
-
-    player->rotation = normalize_angle(player->rotation);
-    player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
-
-    if (getGroundBottom(player) < state.ground_y) {
-        if (player->upside_down && (player->gamemode == GAMEMODE_PLAYER || player->gamemode == GAMEMODE_ROBOT)) state.dead = true;
-        player->y = state.ground_y + (player->height / 2);
-    }
-    if (getGroundTop(player) > state.ceiling_y) {
-        if (!player->upside_down && (player->gamemode == GAMEMODE_PLAYER || player->gamemode == GAMEMODE_ROBOT)) state.dead = true;
-        player->y = state.ceiling_y - (player->height / 2);
-    }
+    // spawn_icon_part(robot_01_03_001, x, y, p_rot + leg_rot, scale, col1, col2, flip); // Back Leg
+    // spawn_icon_part(robot_01_02_001, x, y, p_rot, scale, col1, col2, flip);           // Body
+    // spawn_icon_part(robot_01_01_001, x, y, p_rot, scale, col1, col2, flip);           // Head
+    // spawn_icon_part(robot_01_04_001, x, y, p_rot - leg_rot, scale, col1, col2, flip); // Front Leg
 }
 
 void draw_player(Player *player) {
     if (state.dead) return;
-    float calc_x = ((player->x - state.camera_x));
-    float calc_y = SCREEN_HEIGHT - ((player->y - state.camera_y));
-    u32 primary_color = C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255);
-    u32 secondary_color = C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255);
-    float scale = (player->mini) ? 0.6f : 1.f;
-    float p_rot = player->lerp_rotation * state.mirror_mult;
-    float calc_x_mirror = get_mirror_x(calc_x, state.mirror_factor);
-
-    switch (player->gamemode) {
-        case GAMEMODE_ROBOT:
-        case GAMEMODE_PLAYER:
-            spawn_icon_at(GAMEMODE_PLAYER, selected_cube, player_glow_enabled, calc_x_mirror, calc_y, p_rot, (state.mirror_mult < 0), false, scale, primary_color, secondary_color, C2D_Color32(glow_color.r, glow_color.g, glow_color.b, 255));
-            break;
-        // ... (other cases) ...
+    float x = player->x - state.camera_x;
+    float y = SCREEN_HEIGHT - (player->y - state.camera_y);
+    u32 c1 = C2D_Color32(p1_color.r, p1_color.g, p1_color.b, 255);
+    u32 c2 = C2D_Color32(p2_color.r, p2_color.g, p2_color.b, 255);
+    
+    if (player->gamemode == GAMEMODE_ROBOT) {
+        draw_robot(player, x, y, 1.0f, c1, c2);
+    } else {
+        spawn_icon_at(player->gamemode, selected_cube, true, x, y, player->lerp_rotation, (state.mirror_mult < 0), player->upside_down, 1.0f, c1, c2, 0xFFFFFFFF);
     }
 }
