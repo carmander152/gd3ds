@@ -73,6 +73,9 @@ extern const float cube_accelerations[];
 // Physics Inline Helpers
 inline float getTop(Player *player) { return player->y + player->height / 2; }
 inline float getBottom(Player *player) { return player->y - player->height / 2; }
+inline float getLeft(Player *player) { return player->x - player->width / 2; }
+inline float getRight(Player *player) { return player->x + player->width / 2; }
+
 inline float getGroundTop(Player *player) { return player->y + (player->height / 2) + ((player->gamemode == GAMEMODE_DART) ? (player->mini ? 3 : 5) : 0); }
 inline float getGroundBottom(Player *player) { return player->y - (player->height / 2) - ((player->gamemode == GAMEMODE_DART) ? (player->mini ? 3 : 5) : 0); }
 
@@ -86,6 +89,9 @@ inline float grav(Player *player, float val) { return player->upside_down ? -val
 
 inline float obj_getTop(int obj) { return objects.y[obj] + objects.height[obj] / 2; }
 inline float obj_getBottom(int obj) { return objects.y[obj] - objects.height[obj] / 2; }
+inline float obj_getLeft(int obj) { return objects.x[obj] - objects.width[obj] / 2; }
+inline float obj_getRight(int obj) { return objects.x[obj] + objects.width[obj] / 2; }
+
 inline float obj_gravBottom(Player *player, int obj) { return player->upside_down ? -obj_getTop(obj) : obj_getBottom(obj); }
 inline float obj_gravTop(Player *player, int obj) { return player->upside_down ? -obj_getBottom(obj) : obj_getTop(obj); }
 
