@@ -25,7 +25,7 @@ void robot_gamemode(Player *player) {
         if (player->slope_data.slope_id < 0) player->rotation = 0;
     }
 
-    // Initial Jump
+    // Initial Hop
     if ((player->slope_data.slope_id >= 0 || player->on_ground) && 
         (state.input.holdJump && player->buffering_state == BUFFER_READY)) {
         
@@ -37,7 +37,7 @@ void robot_gamemode(Player *player) {
         player->velocity_override = true;
     }
 
-    // Variable Height Logic
+    // Variable Height Logic (2.0)
     if (player->robot_air_time >= 1.5f || (!state.input.holdJump)) {   
         player->gravity = cube_accelerations[state.speed] * 0.9f;
         player->velocity_override = false;
@@ -46,7 +46,7 @@ void robot_gamemode(Player *player) {
     }
 }
 
-// ... (Keep your cube, ship, ball, ufo, wave gamemode functions here) ...
+// ... (Your other cube, ship, ball, ufo, wave gamemode functions) ...
 
 void run_player(Player *player) {
     float scale = (player->mini) ? 0.6f : 1.f;
@@ -56,21 +56,13 @@ void run_player(Player *player) {
         if (getGroundBottom(player) <= state.ground_y) {
             player->on_ground = !player->upside_down;
             player->on_ceiling = player->upside_down;
-            player->inverse_rotation = false;
             player->time_since_ground = 0; 
         } 
         if (getGroundTop(player) >= state.ceiling_y) {
             player->on_ground = player->upside_down;
             player->on_ceiling = !player->upside_down;
-            player->inverse_rotation = false; 
             player->time_since_ground = 0; 
         } 
-    }
-    
-    if (player->gamemode != GAMEMODE_DART && !state.old_player.on_ground && player->on_ground) {
-        land_particles[state.current_player].emitterX = player->x;
-        land_particles[state.current_player].emitterY = fabsf(gravBottom(player)) + (player->upside_down ? -4 : 4);
-        spawnMultipleParticles(&land_particles[state.current_player], 10);
     }
 
     switch (player->gamemode) {
@@ -83,20 +75,17 @@ void run_player(Player *player) {
     }
     
     player->time_since_ground += STEPS_DT;
-
-    if (!player->velocity_override) {
-        player->vel_y += player->gravity * STEPS_DT;
-    }
+    if (!player->velocity_override) player->vel_y += player->gravity * STEPS_DT;
 
     player->rotation = normalize_angle(player->rotation);
     player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
 
     if (getGroundBottom(player) < state.ground_y) {
-        if ((player->gamemode == GAMEMODE_PLAYER || player->gamemode == GAMEMODE_ROBOT) && player->upside_down) state.dead = true;
+        if (player->upside_down && (player->gamemode == GAMEMODE_PLAYER || player->gamemode == GAMEMODE_ROBOT)) state.dead = true;
         player->y = state.ground_y + (player->height / 2);
     }
     if (getGroundTop(player) > state.ceiling_y) {
-        if ((player->gamemode == GAMEMODE_PLAYER || player->gamemode == GAMEMODE_ROBOT) && !player->upside_down) state.dead = true;
+        if (!player->upside_down && (player->gamemode == GAMEMODE_PLAYER || player->gamemode == GAMEMODE_ROBOT)) state.dead = true;
         player->y = state.ceiling_y - (player->height / 2);
     }
 }
@@ -113,7 +102,6 @@ void draw_player(Player *player) {
 
     switch (player->gamemode) {
         case GAMEMODE_ROBOT:
-            // Placeholder for Robot: drawing cube until you update sprites.t3x
         case GAMEMODE_PLAYER:
             spawn_icon_at(GAMEMODE_PLAYER, selected_cube, player_glow_enabled, calc_x_mirror, calc_y, p_rot, (state.mirror_mult < 0), false, scale, primary_color, secondary_color, C2D_Color32(glow_color.r, glow_color.g, glow_color.b, 255));
             break;
