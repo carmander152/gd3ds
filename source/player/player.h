@@ -93,3 +93,4 @@ void handle_player(Player *player);
 void draw_player(Player *player);
 void run_player(Player *player);
 void update_rotation_direction(Player *player);
+void set_p_velocity(Player *player, float velocity, bool override);
