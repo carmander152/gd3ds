@@ -15,10 +15,24 @@
 #include "triggers.h"
 
 // --- Missing Declarations for Menu & Flow ---
-#include "main_levels.h" 
 #include "menus/main_menu.h"
 #include "menus/gameplay.h"
 #include "menus/level_select.h"
+
+// Bypass the missing main_levels.h by declaring the structure and external array manually!
+typedef struct {
+    char *level_name;
+    char *gmd_path;
+    char *song_path;
+    int difficulty;
+    int stars;
+    int background_id;
+    int ground_id;
+    int audio_track; 
+} MainLevelDefinition;
+
+extern MainLevelDefinition main_levels[];
+extern int curr_level_id;
 // ------------------------------------------
 
 C3D_RenderTarget* top;
