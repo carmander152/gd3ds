@@ -15,9 +15,10 @@
 #include "triggers.h"
 
 // --- Missing Declarations for Menu & Flow ---
-#include "menus/main_levels.h" 
+#include "main_levels.h" 
 #include "menus/main_menu.h"
 #include "menus/gameplay.h"
+#include "menus/level_select.h"
 // ------------------------------------------
 
 C3D_RenderTarget* top;
