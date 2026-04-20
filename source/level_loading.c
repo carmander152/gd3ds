@@ -1,20 +1,18 @@
 #include <stdlib.h>
 #include <stdbool.h>
-#include "level_loading.h"
-#include "defines.h"
 #include <zlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
+#include "level_loading.h"
+#include "defines.h"
 #include "color_channels.h"
 #include "objects.h"
 #include "objects_array.h"
 #include "mp3_player.h"
 #include "graphics.h"
 #include "math_helpers.h"
-#include "utils/json_config.h"
 #include "state.h"
-#include "player/collision.h"
 
 ObjectsArray objects = { 0 };
 Section empty_section = { 0 };
@@ -22,6 +20,8 @@ Section *section_hash[SECTION_HASH_SIZE] = {0};
 int channelCount = 0;
 GDColorChannel *colorChannels = NULL;
 LoadedLevelInfo level_info;
+
+// --- Section Hashing Logic ---
 
 static inline unsigned int section_hash_func(unsigned int x, unsigned int y) {
     return ((unsigned int)x * 73856093u ^ (unsigned int)y * 19349663u) & (SECTION_HASH_SIZE - 1);
@@ -79,6 +79,8 @@ void assign_object_to_section(int obj) {
     sec->objects[sec->object_count++] = obj;
 }
 
+// --- File Reading & GMD Decoding ---
+
 char *read_file(const char *filepath, size_t *out_size) {
     FILE *f = fopen(filepath, "rb");
     if (!f) return NULL;
@@ -116,6 +118,8 @@ char *extract_gmd_key(const char *data, const char *key, const char *type) {
     return value;
 }
 
+// --- Base64 Logic ---
+
 int b64_char(char c) {
     if ('A' <= c && c <= 'Z') return c - 'A';
     if ('a' <= c && c <= 'z') return c - 'a' + 26;
@@ -137,8 +141,8 @@ int base64_decode(const char *in, unsigned char *out) {
     for (int i = 0; in[i] && in[i+1] && in[i+2] && in[i+3]; i += 4) {
         int a = b64_char(in[i]);
         int b = b64_char(in[i+1]);
-        int c = in[i+2] == '=' ? 0 : b64_char(in[i+2]);
-        int d = in[i+3] == '=' ? 0 : b64_char(in[i+3]);
+        int c = (in[i+2] == '=') ? 0 : b64_char(in[i+2]);
+        int d = (in[i+3] == '=') ? 0 : b64_char(in[i+3]);
         if (a == -1 || b == -1 || c == -1 || d == -1) return -1;
         out[len++] = (a << 2) | (b >> 4);
         if (in[i+2] != '=') out[len++] = (b << 4) | (c >> 2);
@@ -147,25 +151,22 @@ int base64_decode(const char *in, unsigned char *out) {
     return len;
 }
 
+// --- Decompression Logic ---
+
 uLongf get_uncompressed_size(unsigned char *data, int data_len) {
-    z_stream strm;
-    memset(&strm, 0, sizeof(strm));
+    z_stream strm = {0};
     strm.next_in = data;
     strm.avail_in = data_len;
     if (inflateInit2(&strm, 15 | 32) != Z_OK) return 0;
     uLongf total_out = 0;
     unsigned char buf[4096];
+    int ret;
     do {
         strm.next_out = buf;
         strm.avail_out = sizeof(buf);
-        int ret = inflate(&strm, Z_NO_FLUSH);
-        if (ret == Z_STREAM_ERROR || ret == Z_DATA_ERROR || ret == Z_MEM_ERROR) {
-            inflateEnd(&strm);
-            return 0;
-        }
+        ret = inflate(&strm, Z_NO_FLUSH);
         total_out += sizeof(buf) - strm.avail_out;
-        if (ret == Z_STREAM_END) break;
-    } while (strm.avail_in > 0);
+    } while (ret == Z_OK);
     inflateEnd(&strm);
     return total_out;
 }
@@ -177,7 +178,6 @@ char *decompress_data(unsigned char *data, int data_len, uLongf *out_len) {
     strm.avail_in = data_len;
     if (inflateInit2(&strm, 15 | 32) != Z_OK) return NULL;
     char *out = malloc(final_size + 1);
-    if (!out) { inflateEnd(&strm); return NULL; }
     strm.next_out = (Bytef *)out;
     strm.avail_out = final_size;
     int ret = inflate(&strm, Z_FINISH);
@@ -188,42 +188,19 @@ char *decompress_data(unsigned char *data, int data_len, uLongf *out_len) {
     return out;
 }
 
-char *get_metadata_value(const char *levelString, const char *key) {
-    if (!levelString || !key) return NULL;
-    const char *end = strchr(levelString, ';');
-    if (!end) return NULL;
-    size_t metadataLen = end - levelString;
-    char *metadata = malloc(metadataLen + 1);
-    strncpy(metadata, levelString, metadataLen);
-    metadata[metadataLen] = '\0';
-    char *token = strtok(metadata, ",");
-    while (token) {
-        if (strcmp(token, key) == 0) {
-            char *value = strtok(NULL, ",");
-            if (!value) break;
-            char *result = strdup(value);
-            free(metadata);
-            return result;
-        }
-        token = strtok(NULL, ",");
-    }
-    free(metadata);
-    return NULL;
-}
-
 char *decompress_level(char *data) {
-    char *b64 = extract_gmd_key((const char *) data, "k4", "s");
+    char *b64 = extract_gmd_key((const char *)data, "k4", "s");
     if (!b64) return data;
     fix_base64_url(b64);
     unsigned char *decoded = malloc(strlen(b64));
     int decoded_len = base64_decode(b64, decoded);
-    if (decoded_len <= 0) { free(b64); free(decoded); return NULL; }
     uLongf decompressed_len;
     char *decompressed = decompress_data(decoded, decoded_len, &decompressed_len);
-    free(decoded);
-    free(b64);
+    free(decoded); free(b64);
     return decompressed;
 }
+
+// --- Object Logic & String Parsing ---
 
 char **split_string(const char *str, char delimiter, int *outCount) {
     char **result = NULL;
@@ -233,23 +210,21 @@ char **split_string(const char *str, char delimiter, int *outCount) {
     while (*ptr) {
         if (*ptr == delimiter) {
             int len = ptr - start;
-            if (len > 0) {
-                char *token = (char *)malloc(len + 1);
-                strncpy(token, start, len);
-                token[len] = '\0';
-                result = (char **)realloc(result, sizeof(char*) * (count + 1));
-                result[count++] = token;
-            }
+            char *token = malloc(len + 1);
+            strncpy(token, start, len);
+            token[len] = '\0';
+            result = realloc(result, sizeof(char*) * (count + 1));
+            result[count++] = token;
             start = ptr + 1;
         }
         ptr++;
     }
     if (ptr > start) {
         int len = ptr - start;
-        char *token = (char *)malloc(len + 1);
+        char *token = malloc(len + 1);
         strncpy(token, start, len);
         token[len] = '\0';
-        result = (char **)realloc(result, sizeof(char*) * (count + 1));
+        result = realloc(result, sizeof(char*) * (count + 1));
         result[count++] = token;
     }
     *outCount = count;
@@ -270,20 +245,20 @@ GDValueType get_value_type_for_key(int key) {
         case 5:  return GD_VAL_BOOL;
         case 6:  return GD_VAL_FLOAT;
         case 10: return GD_VAL_FLOAT;
-        case 35: return GD_VAL_FLOAT; // Opacity (2.0)
-        case 51: return GD_VAL_INT;   // Target Group (2.0)
-        case 57: return GD_VAL_INT;   // Object Group (2.0)
-        case 28: return GD_VAL_FLOAT; // Move X (2.0)
-        case 29: return GD_VAL_FLOAT; // Move Y (2.0)
+        case 35: return GD_VAL_FLOAT; // Opacity
+        case 51: return GD_VAL_INT;   // Target Group
+        case 57: return GD_VAL_INT;   // Group ID
+        case 28: return GD_VAL_FLOAT; // Move X
+        case 29: return GD_VAL_FLOAT; // Move Y
         default: return GD_VAL_INT;
     }
 }
 
 int convert_object(int id) {
     switch (id) {
-        case 901: return 901; // Move Trigger
+        case 901: return 901;   // Move Trigger
         case 1007: return 1007; // Alpha Trigger
-        case 143: return 143; // Robot Portal
+        case 143: return 143;   // Robot Portal
         case 1734: return 675;
         case 1329: return SECRET_COIN;
     }
@@ -310,34 +285,14 @@ bool init_arrays(int count) {
     objects.x = malloc(sizeof(float) * count);
     objects.y = malloc(sizeof(float) * count);
     objects.rotation = malloc(sizeof(float) * count);
-    objects.zlayer = malloc(sizeof(int) * count);
-    objects.zorder = malloc(sizeof(int) * count);
     objects.trig_duration = malloc(sizeof(float) * count);
-    objects.width = malloc(sizeof(float) * count);
-    objects.height = malloc(sizeof(float) * count);
-    objects.v1p9_col_channel = malloc(sizeof(unsigned short) * count);
-    objects.col_channel = malloc(sizeof(unsigned short) * count);
-    objects.detail_col_channel = malloc(sizeof(unsigned short) * count);
-    objects.target_color_id = malloc(sizeof(unsigned short) * count);
-    objects.hitbox_counter = malloc(sizeof(unsigned short) * count);
-    objects.transition_applied = malloc(sizeof(unsigned char) * count);
-    objects.trig_colorR = malloc(sizeof(unsigned char) * count);
-    objects.trig_colorG = malloc(sizeof(unsigned char) * count);
-    objects.trig_colorB = malloc(sizeof(unsigned char) * count);
-    objects.orientation = malloc(sizeof(unsigned char) * count);
-    objects.tintGround = malloc(sizeof(bool) * count);
-    objects.p1_color = malloc(sizeof(bool) * count);
-    objects.p2_color = malloc(sizeof(bool) * count);
-    objects.blending = malloc(sizeof(bool) * count);
-    objects.touch_triggered = malloc(sizeof(bool) * count);
-    objects.flippedH = malloc(sizeof(bool) * count);
-    objects.flippedV = malloc(sizeof(bool) * count);
-    objects.toggled = malloc(sizeof(bool) * count);
-    objects.activated = malloc(sizeof(u8) * count);
-    objects.collided = malloc(sizeof(u8) * count);
     objects.group_id = malloc(sizeof(int) * count);
     objects.opacity = malloc(sizeof(float) * count);
-
+    objects.activated = malloc(sizeof(u8) * count);
+    objects.target_color_id = malloc(sizeof(unsigned short) * count);
+    objects.trig_colorR = malloc(sizeof(unsigned char) * count);
+    objects.trig_colorG = malloc(sizeof(unsigned char) * count);
+    
     for (int i = 0; i < count; i++) {
         objects.opacity[i] = 1.0f;
         objects.group_id[i] = 0;
@@ -348,17 +303,10 @@ bool init_arrays(int count) {
 
 void free_arrays() {
     free(objects.random); free(objects.id); free(objects.x); free(objects.y);
-    free(objects.rotation); free(objects.zlayer); free(objects.zorder);
-    free(objects.trig_duration); free(objects.width); free(objects.height);
-    free(objects.v1p9_col_channel); free(objects.col_channel);
-    free(objects.detail_col_channel); free(objects.target_color_id);
-    free(objects.hitbox_counter); free(objects.transition_applied);
-    free(objects.trig_colorR); free(objects.trig_colorG); free(objects.trig_colorB);
-    free(objects.orientation); free(objects.tintGround); free(objects.p1_color);
-    free(objects.p2_color); free(objects.blending); free(objects.touch_triggered);
-    free(objects.flippedH); free(objects.flippedV); free(objects.toggled);
-    free(objects.activated); free(objects.collided); free(objects.group_id);
-    free(objects.opacity);
+    free(objects.rotation); free(objects.trig_duration);
+    free(objects.group_id); free(objects.opacity);
+    free(objects.activated); free(objects.target_color_id);
+    free(objects.trig_colorR); free(objects.trig_colorG);
 }
 
 bool parse_string(const char *levelString) {
@@ -375,9 +323,9 @@ bool parse_string(const char *levelString) {
             int key = atoi(tokens[j]);
             GDValueType type = get_value_type_for_key(key);
             GDValue val;
-            if (type == GD_VAL_INT) val.i = atoi(tokens[j+1]);
-            else if (type == GD_VAL_FLOAT) val.f = atof(tokens[j+1]);
-            else val.b = (tokens[j+1][0] == '1');
+            if (type == GD_VAL_INT) val.i = atoi(tokens[j + 1]);
+            else if (type == GD_VAL_FLOAT) val.f = atof(tokens[j + 1]);
+            else val.b = (tokens[j + 1][0] == '1');
             fill_object_data(i, key, type, val);
         }
         free_string_array(tokens, tokenCount);
@@ -394,8 +342,7 @@ int load_level(char *path) {
     char *data = decompress_level(level);
     if (!data) return 2;
     parse_string(data);
-    free(data);
-    free(level);
+    free(data); free(level);
     return 0;
 }
 
