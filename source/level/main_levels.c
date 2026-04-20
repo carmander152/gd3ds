@@ -129,8 +129,8 @@ MainLevelDefinition main_levels[] = {
     },
     {
         .level_name = "Geometrical Dominator",
-        .gmd_path = "sdmc:/gd3ds/levels/GeometricalDominator.gmd",
-        .song_path = "sdmc:/gd3ds/songs/GeometricalDominator.mp3", 
+        .gmd_path = "romfs:/main_levels/GeometricalDominator.gmd",
+        .song_path = "romfs:/songs/GeometricalDominator.mp3", 
         .difficulty = MAIN_DIFF_HARDER,
         .stars = 10
     }
