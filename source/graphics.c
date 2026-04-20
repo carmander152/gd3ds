@@ -23,6 +23,26 @@
 
 #include "menus/components/ui_screen.h"
 
+// --- Missing 2.0 Declarations ---
+extern ParticleSystem drag_particles[2];
+extern ParticleSystem ship_fire_particles[2];
+extern ParticleSystem ship_secondary_particles[2];
+extern ParticleSystem secondary_particles[2];
+extern ParticleSystem burst_particles[2];
+extern ParticleSystem explosion_particles[2];
+extern ParticleSystem glitter_particles;
+extern ParticleSystem drag_particles_2[2];
+extern ParticleSystem slow_speed_particles;
+extern ParticleSystem normal_speed_particles;
+extern ParticleSystem fast_speed_particles;
+extern ParticleSystem faster_speed_particles;
+
+void draw_p1_trail(Player *player);
+void draw_hitbox(int obj_index);
+void draw_player_hitbox(Player *player);
+void draw_hitbox_trail(int param);
+// --------------------------------
+
 const Color white = { 255, 255, 255 };
 
 int sprite_count = 0;
