@@ -24,34 +24,24 @@ typedef struct {
 typedef struct {
     float camera_x;
     float camera_y;
-
     float old_camera_x;
     float old_camera_y;
-
     float camera_intended_y;
-
     float camera_x_lerp;
     float camera_y_lerp;
-
     float camera_x_middle;
     float camera_y_middle;
-
     float intermediate_camera_y;
-    
     float camera_wall_timer;
     float camera_wall_initial_y;
-
     float ground_x;
     float ground_wall_initial_x;
-
     float background_x;
     float background_wall_initial_x;
     
     Player player;
     Player player2;
-
     unsigned char current_player;
-
     Player old_player;
 
     int mirror_mult;
@@ -72,11 +62,9 @@ typedef struct {
     bool dual;
     bool dual_setup;
     bool dead;
-
     bool profiling;
 
     float level_progress;
-
     float timer;
     float death_timer;
 
@@ -99,5 +87,4 @@ void set_gamemode(Player *player, int gamemode);
 void set_mini(Player *player, bool mini);
 void init_variables();
 void run_camera();
-
 void handle_death();
