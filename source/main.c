@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdarg.h>
 
 #include "objects.h"
 #include "objects_array.h"
@@ -21,11 +22,53 @@
 #include "menus/level_select.h"
 // ------------------------------------
 
+// --- LINKER POLYFILLS (Missing Wii Port Data) ---
+bool is_citra = false;
+int frame_skipped = 0;
+int level_frame = 0;
+const float player_speeds[5] = { 251.16f, 311.58f, 387.42f, 468.0f, 576.0f };
+
+// Missing Particle Arrays
+ParticleSystem drag_particles[2];
+ParticleSystem ship_fire_particles[2];
+ParticleSystem ship_secondary_particles[2];
+ParticleSystem secondary_particles[2];
+ParticleSystem burst_particles[2];
+ParticleSystem land_particles[2];
+ParticleSystem explosion_particles[2];
+ParticleSystem drag_particles_2[2];
+ParticleSystem touch_drag_particles;
+ParticleSystem touch_explosion_particles;
+ParticleSystem coin_pickup_particles;
+ParticleSystem glitter_particles;
+ParticleSystem slow_speed_particles;
+ParticleSystem normal_speed_particles;
+ParticleSystem fast_speed_particles;
+ParticleSystem faster_speed_particles;
+
+MotionTrail trail_p1;
+MotionTrail trail_p2;
+MotionTrail wave_trail_p1;
+MotionTrail wave_trail_p2;
+
+// Missing Menu and Debug Functions
+void alt_title_screen() {}
+void playing_menu_loop() {}
+void draw_hitbox(int obj_index) {}
+void draw_player_hitbox(Player *player) {}
+void draw_hitbox_trail(int param) {}
+void draw_p1_trail(Player *player) {}
+void output_log(const char* fmt, ...) {}
+
+// Missing Physics Function (Crucial for the Robot's jump!)
+void set_p_velocity(Player* player, float velocity, bool override) {
+    player->vel_y = velocity; 
+}
+// ------------------------------------------------
+
 C3D_RenderTarget* top;
 C3D_RenderTarget* bot;
 int game_state = STATE_MAIN_MENU;
-
-// ... (Your particle initialization code from original main.c) ...
 
 void game_loop() {
     char *path = state.custom_level ? state.custom_level_path : main_levels[curr_level_id].gmd_path;
