@@ -4,23 +4,20 @@
 #include "level_loading.h"
 #include "icons.h"
 #include "particles/particles.h"
-
 #include "trail.h"
 
 extern int frame_skipped;
 
 #define STEPS_HZ 240
-#define STEPS_DT ((1.f + frame_skipped) / STEPS_HZ) // 1/240 seconds per physics step
-#define STEPS_DT_UNMOD (1.f / STEPS_HZ) // 1/240 seconds per physics step
+#define STEPS_DT ((1.f + frame_skipped) / STEPS_HZ) 
+#define STEPS_DT_UNMOD (1.f / STEPS_HZ) 
 
 #define P1_TRAIL_LENGTH 10
 #define P1_TRAIL_DURATION 0.45f
 #define P1_TRAIL_END_SCALE 0.8f
 
 #define BURST_PARTICLES_DURATION 0.15f
-
 #define DRAG_PARTICLES_FLOOR_DURATION 0.1f
-
 #define BALL_SLOW_ROTATION 0.7f
 
 typedef struct {
@@ -46,14 +43,10 @@ typedef struct {
     float x;
     float y;
     float rot;
-
     float scale;
     float delta_scale;
-
     float opacity;
-
     float life;
-
     bool upside_down;
     bool active;
 } P1Trail;
@@ -61,26 +54,19 @@ typedef struct {
 typedef struct {
     float x;
     float y;
-    
     float vel_x;
     float vel_y;
-
     float new_vel_y;
-
     float delta_y;
-    
     float gravity;
-
     float rotation;
     float lerp_rotation;
-    
     float width;
     float height;
 
     InternalHitbox internal_hitbox;
 
     int gamemode;
-    
     int rotation_direction;
 
     bool on_ground;
@@ -92,46 +78,47 @@ typedef struct {
     bool snap_rotation;
     
     int potentialSlope_id;
-
     bool left_ground;
 
     float ball_rotation_speed;
-
     float cutscene_timer;
-
     int buffering_state;
-
     float time_since_ground;
-    
     float ufo_last_y;
-
     float ceiling_inv_time;
-
     float timeElapsed;
-
     int gravObj_id;
 
     float burst_particle_timer;
-
     float cutscene_initial_player_x;
     float cutscene_initial_player_y;
-
     int slope_slide_coyote_time;
-
     int frame;
 
     SlopeData coyote_slope;
     SlopeData slope_data;
-
     SnapData snap_data;
 
     bool velocity_override;
-
     float coyote_frames;
     
     int p1_trail_pos;
     P1Trail p1_trail_data[P1_TRAIL_LENGTH];
+
+    // --- 2.0 ROBOT ADDITIONS ---
+    float robot_air_time;
+    float robot_anim_timer;
+    int curr_robot_animation_id;
 } Player;
+
+enum Gamemodes {
+    GAMEMODE_PLAYER,      // Cube
+    GAMEMODE_SHIP,
+    GAMEMODE_PLAYER_BALL,
+    GAMEMODE_BIRD,        // UFO
+    GAMEMODE_DART,        // Wave
+    GAMEMODE_ROBOT        // Robot (2.0)
+};
 
 enum BufferingState {
     BUFFER_NONE,
@@ -175,6 +162,8 @@ extern ParticleSystem faster_speed_particles;
 extern ParticleSystem coin_pickup_particles;
 
 extern const float player_speeds[SPEED_COUNT];
+extern const float cube_jump_heights[SPEED_COUNT];
+extern const float cube_accelerations[];
 
 inline float getTop(Player *player)  { return player->y + player->height / 2; }
 inline float getBottom(Player *player)  { return player->y - player->height / 2; }
