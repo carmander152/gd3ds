@@ -2107,7 +2107,7 @@ const Icon icons_player[143] = {
 };
 
 const Icon icons_ship[52] = {
-    { 0, NULL },
+    { 3, ship_1 },
     { 3, ship_1 },
     { 3, ship_2 },
     { 3, ship_3 },
@@ -2209,7 +2209,7 @@ const Icon icons_player_ball[44] = {
 };
 
 const Icon icons_bird[36] = {
-    { 0, NULL },
+    { 4, bird_1 },
     { 4, bird_1 },
     { 4, bird_2 },
     { 4, bird_3 },
@@ -2248,7 +2248,7 @@ const Icon icons_bird[36] = {
 };
 
 const Icon icons_dart[36] = {
-    { 0, NULL },
+    { 3, dart_1 },
     { 3, dart_1 },
     { 3, dart_2 },
     { 3, dart_3 },
