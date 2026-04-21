@@ -1960,6 +1960,13 @@ static const IconPart dart_35[] = {
  { 267, 0.00, 0.00, 1.00, 1.00, 0, 0, 0, 0.00, 0, 1.00 },
 };
 
+static const IconPart real_robot_1[] = {
+    { robot_01_01_001_idx, 0.00, 0.00, 1.00, 1.00, 0, 0, 0, 0.00, 0, 1.00 },
+    { robot_01_02_001_idx, 0.00, 0.00, 1.00, 1.00, 0, 0, 0, 0.00, 0, 1.00 },
+    { robot_01_03_001_idx, 0.00, 0.00, 1.00, 1.00, 0, 0, 0, 0.00, 0, 1.00 },
+    { robot_01_04_001_idx, 0.00, 0.00, 1.00, 1.00, 0, 0, 0, 0.00, 0, 1.00 },
+};
+
 const Icon icons_player[143] = {
     { 3, player_0 },
     { 3, player_1 },
@@ -2287,16 +2294,16 @@ const Icon icons_dart[36] = {
 };
 
 const Icon icons_robot[10] = {
-    { 3, player_0 },
-    { 3, player_0 },
-    { 3, player_0 },
-    { 3, player_0 },
-    { 3, player_0 },
-    { 3, player_0 },
-    { 3, player_0 },
-    { 3, player_0 },
-    { 3, player_0 },
-    { 3, player_0 }
+    { 4, real_robot_1 },
+    { 4, real_robot_1 },
+    { 4, real_robot_1 },
+    { 4, real_robot_1 },
+    { 4, real_robot_1 },
+    { 4, real_robot_1 },
+    { 4, real_robot_1 },
+    { 4, real_robot_1 },
+    { 4, real_robot_1 },
+    { 4, real_robot_1 }
 };
 
 const Icon* icons[] = {
