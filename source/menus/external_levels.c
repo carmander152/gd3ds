@@ -71,7 +71,11 @@ void load_level_folder(char *folder) {
     char path[261];
     sprintf(path, "Root/%s", current_path);
     truncate_filename(path, 30);
-    strncpy(path_label->label.text, path, 256);
+    
+    // Warning fix: safely copy and ensure null-termination
+    strncpy(path_label->label.text, path, 255);
+    path_label->label.text[255] = '\0';
+    
     int count = 0;
     FileOrFolder *entries = load_folder(folder, &count);
     char level_name[256];
