@@ -2286,10 +2286,7 @@ const Icon icons_dart[36] = {
     { 4, dart_35 },
 };
 
-const Icon* icons[GAMEMODE_COUNT] = {
- icons_player,
- icons_ship,
- icons_player_ball,
- icons_bird,
- icons_dart,
+const Icon icons_robot[2] = {
+    { 0, NULL },
+    { 0, NULL }
 };
