@@ -2291,7 +2291,7 @@ const Icon icons_robot[2] = {
     { 0, NULL }
 };
 
-const Icon* const icons[] = {
+const Icon* icons[] = {
     icons_player,
     icons_ship,
     icons_player_ball,
