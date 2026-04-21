@@ -2286,9 +2286,17 @@ const Icon icons_dart[36] = {
     { 4, dart_35 },
 };
 
-const Icon icons_robot[2] = {
-    { 0, NULL },
-    { 0, NULL }
+const Icon icons_robot[10] = {
+    { 3, player_0 },
+    { 3, player_0 },
+    { 3, player_0 },
+    { 3, player_0 },
+    { 3, player_0 },
+    { 3, player_0 },
+    { 3, player_0 },
+    { 3, player_0 },
+    { 3, player_0 },
+    { 3, player_0 }
 };
 
 const Icon* icons[] = {
