@@ -109,6 +109,11 @@ void draw_robot(Player *player, float x, float y, float scale, u32 col1, u32 col
     float p_rot = player->lerp_rotation;
     float leg_rot = player->on_ground ? sinf(player->x * 0.15f) * 40.0f : 0;
 
+    // Warning fixes: safely cast unused variables to void
+    (void)flip;
+    (void)p_rot;
+    (void)leg_rot;
+
     // Uncomment these and use your indices once you check build/sprites.h
     /*
     C2D_DrawSprite(get_sprite(robot_part_back_leg_idx), x, y, p_rot + leg_rot, scale, col1, col2, flip);
