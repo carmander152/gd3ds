@@ -14,24 +14,31 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          
       - name: Make application
         run: |
           chmod -R 755 buildtools/
           make 3dsx cia
+          
+      - name: Run addr2line for Debugging
+        run: |
+          /opt/devkitpro/devkitARM/bin/arm-none-eabi-addr2line -e output/GeometryDash3DS.elf 0010F6F4
+          
       - name: Prepare for build publishing
         run: |
           mkdir -p out/3dsx/rom
           mkdir -p out/cia/rom
           cp output/GeometryDash3DS.3dsx out/3dsx/rom
           cp output/GeometryDash3DS.cia out/cia/rom
+          
       - name: Publish 3dsx to GH Actions
         uses: actions/upload-artifact@main
         with:
           name: gd3ds-3dsx
           path: out/3dsx/rom
+          
       - name: Publish cia to GH Actions
         uses: actions/upload-artifact@main
         with:
           name: gd3ds-cia
           path: out/cia/rom
-            
